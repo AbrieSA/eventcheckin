@@ -1,0 +1,212 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Primary Colors */
+    --color-primary: #2D5A3D; /* Deep sage - green-800 */
+    --color-primary-foreground: #FFFFFF; /* white */
+    
+    /* Secondary Colors */
+    --color-secondary: #4A7C59; /* Lighter sage - green-600 */
+    --color-secondary-foreground: #FFFFFF; /* white */
+    
+    /* Accent Colors */
+    --color-accent: #E67E22; /* Warm orange - orange-600 */
+    --color-accent-foreground: #FFFFFF; /* white */
+    
+    /* Background Colors */
+    --color-background: #FAFBFA; /* Soft warm white - gray-50 */
+    --color-foreground: #1A1A1A; /* Primary text - gray-900 */
+    
+    /* Surface Colors */
+    --color-card: #FFFFFF; /* white */
+    --color-card-foreground: #2C2C2C; /* gray-800 */
+    
+    /* Popover Colors */
+    --color-popover: #FFFFFF; /* white */
+    --color-popover-foreground: #1A1A1A; /* gray-900 */
+    
+    /* Muted Colors */
+    --color-muted: #F3F4F6; /* gray-100 */
+    --color-muted-foreground: #6B7280; /* gray-500 */
+    
+    /* Destructive Colors */
+    --color-destructive: #DC2626; /* red-600 */
+    --color-destructive-foreground: #FFFFFF; /* white */
+    
+    /* Success Colors */
+    --color-success: #059669; /* green-600 */
+    --color-success-foreground: #FFFFFF; /* white */
+    
+    /* Warning Colors */
+    --color-warning: #D97706; /* amber-600 */
+    --color-warning-foreground: #FFFFFF; /* white */
+    
+    /* Error Colors */
+    --color-error: #DC2626; /* red-600 */
+    --color-error-foreground: #FFFFFF; /* white */
+    
+    /* Border & Input */
+    --color-border: rgba(45, 90, 61, 0.12); /* primary with opacity */
+    --color-input: #E5E7EB; /* gray-200 */
+    --color-ring: #2D5A3D; /* primary - green-800 */
+    
+    /* Border Radius */
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(45, 90, 61, 0.08);
+    --shadow-md: 0 4px 8px rgba(45, 90, 61, 0.10);
+    --shadow-lg: 0 10px 20px rgba(45, 90, 61, 0.12);
+    --shadow-xl: 0 20px 40px rgba(45, 90, 61, 0.12);
+  }
+
+  .dark {
+    /* Primary Colors */
+    --color-primary: #4A7C59; /* Lighter sage for dark mode - green-600 */
+    --color-primary-foreground: #FFFFFF; /* white */
+    
+    /* Secondary Colors */
+    --color-secondary: #2D5A3D; /* Deep sage - green-800 */
+    --color-secondary-foreground: #FFFFFF; /* white */
+    
+    /* Accent Colors */
+    --color-accent: #F39C12; /* Brighter orange for dark mode - orange-500 */
+    --color-accent-foreground: #FFFFFF; /* white */
+    
+    /* Background Colors */
+    --color-background: #0F1410; /* Dark sage base - custom dark */
+    --color-foreground: #EBEBEB; /* 92% white - gray-100 */
+    
+    /* Surface Colors */
+    --color-card: #1A2B1D; /* Elevated dark sage - custom dark */
+    --color-card-foreground: #E5E5E5; /* gray-200 */
+    
+    /* Popover Colors */
+    --color-popover: #243529; /* Higher elevation sage - custom dark */
+    --color-popover-foreground: #EBEBEB; /* gray-100 */
+    
+    /* Muted Colors */
+    --color-muted: #1F2F22; /* Muted dark sage - custom dark */
+    --color-muted-foreground: #9CA3AF; /* gray-400 */
+    
+    /* Destructive Colors */
+    --color-destructive: #EF4444; /* Softer red for dark mode - red-500 */
+    --color-destructive-foreground: #FFFFFF; /* white */
+    
+    /* Success Colors */
+    --color-success: #10B981; /* Brighter green for dark mode - green-500 */
+    --color-success-foreground: #FFFFFF; /* white */
+    
+    /* Warning Colors */
+    --color-warning: #F59E0B; /* Brighter amber for dark mode - amber-500 */
+    --color-warning-foreground: #FFFFFF; /* white */
+    
+    /* Error Colors */
+    --color-error: #EF4444; /* red-500 */
+    --color-error-foreground: #FFFFFF; /* white */
+    
+    /* Border & Input */
+    --color-border: rgba(74, 124, 89, 0.20); /* lighter sage with opacity */
+    --color-input: #374151; /* gray-700 */
+    --color-ring: #4A7C59; /* lighter sage - green-600 */
+    
+    /* Shadows - adjusted for dark mode */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1 {
+    @apply text-4xl font-semibold leading-tight;
+  }
+
+  h2 {
+    @apply text-3xl font-medium leading-snug;
+  }
+
+  h3 {
+    @apply text-2xl font-medium leading-normal;
+  }
+
+  h4 {
+    @apply text-xl font-medium leading-relaxed;
+  }
+
+  h5 {
+    @apply text-lg font-medium leading-relaxed;
+  }
+
+  .caption {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+  }
+
+  .data-text {
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    font-feature-settings: 'tnum' on, 'lnum' on;
+  }
+}
+
+@layer utilities {
+  .transition-smooth {
+    transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .transition-bounce {
+    transition: all 250ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .touch-target {
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  .focus-ring {
+    @apply outline-none ring-3 ring-ring ring-offset-3 ring-offset-background rounded-md;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    @apply bg-muted rounded-md;
+  }
+.scrollbar-custom::-webkit-scrollbar-thumb  {
+    @apply rounded-md;
+  }
+}
