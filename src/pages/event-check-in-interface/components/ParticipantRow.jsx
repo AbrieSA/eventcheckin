@@ -77,6 +77,7 @@ const ParticipantRow = ({
               size="lg"
               className="w-6 h-6 pointer-events-none"
               aria-label={`Check in ${participant?.name}`}
+            />
           </button>
         </td>
         <td className="px-4 py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
