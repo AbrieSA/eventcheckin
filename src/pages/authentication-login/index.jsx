@@ -12,6 +12,7 @@ const AuthenticationLogin = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const appVersion = '0.1.0';
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -81,6 +82,7 @@ const AuthenticationLogin = () => {
           <h1 className="text-3xl font-heading font-bold text-foreground mb-2">
             EventMe
           </h1>
+          <p className="text-xs text-muted-foreground">v{appVersion}</p>
         </div>
 
         {/* Login Form */}
