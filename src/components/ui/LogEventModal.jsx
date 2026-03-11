@@ -76,7 +76,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
       };
 
       // Call service to log event
-      await attendanceService?.logEvent(activeEvent?.id, eventData, participantStages);
+      await attendanceService?.logEvent(activeEvent?.id, eventData, participantStages, participantLabels);
 
       // Notify parent component that event was logged successfully
       onEventLogged?.();

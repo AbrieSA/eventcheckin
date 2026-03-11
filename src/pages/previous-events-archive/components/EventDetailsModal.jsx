@@ -2,6 +2,18 @@ import React from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
+const LABEL_STYLES = {
+  leader: 'bg-purple-100 text-purple-700',
+  volunteer: 'bg-blue-100 text-blue-700',
+  participant: 'bg-gray-100 text-gray-600',
+};
+
+const LABEL_DISPLAY = {
+  leader: 'Leader',
+  volunteer: 'Volunteer',
+  participant: 'Participant',
+};
+
 const EventDetailsModal = ({ event, onClose }) => {
   if (!event) return null;
 
@@ -12,10 +24,10 @@ const EventDetailsModal = ({ event, onClose }) => {
   };
 
   const handleExport = () => {
-    // Create CSV content
-    const headers = ['Participant', 'Checked Out?'];
+    const headers = ['Participant', 'Label', 'Checked Out?'];
     const rows = event?.attendanceRecords?.map(record => [
       `${record?.participant?.firstName || ''} ${record?.participant?.lastName || ''}`?.trim(),
+      LABEL_DISPLAY[record?.label] || 'Participant',
       record?.checkedOutAt ? 'Yes' : 'No'
     ]);
 
@@ -24,7 +36,6 @@ const EventDetailsModal = ({ event, onClose }) => {
       ...rows?.map(row => row?.join(','))
     ]?.join('\n');
 
-    // Create and download file
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL?.createObjectURL(blob);
     const a = document.createElement('a');
@@ -94,24 +105,30 @@ const EventDetailsModal = ({ event, onClose }) => {
                 No participants found
               </div>
             ) : (
-              event?.attendanceRecords?.map((record) => (
-                <div
-                  key={record?.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
-                >
-                  <div className="flex-1">
-                    <div className="text-gray-900 font-medium">
-                      {record?.participant?.firstName} {record?.participant?.lastName}
+              event?.attendanceRecords?.map((record) => {
+                const label = record?.label || 'participant';
+                return (
+                  <div
+                    key={record?.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="text-gray-900 font-medium">
+                        {record?.participant?.firstName} {record?.participant?.lastName}
+                      </div>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${LABEL_STYLES[label] || LABEL_STYLES.participant}`}>
+                        {LABEL_DISPLAY[label] || 'Participant'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Checked Out?</span>
+                      <div className={`w-5 h-5 rounded ${
+                        record?.checkedOutAt ? 'bg-green-500' : 'bg-gray-300'
+                      }`} />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Checked Out?</span>
-                    <div className={`w-5 h-5 rounded ${
-                      record?.checkedOutAt ? 'bg-green-500' : 'bg-gray-300'
-                    }`} />
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>

@@ -383,7 +383,7 @@ export const attendanceService = {
   },
 
   // Log event with attendance records
-  async logEvent(eventId, eventData, participantStages) {
+  async logEvent(eventId, eventData, participantStages, participantLabels = {}) {
     try {
       // Update event to mark as inactive and save notes
       const snakeData = toSnakeCase(eventData);
@@ -409,7 +409,8 @@ export const attendanceService = {
             event_id: eventId,
             participant_id: participantId,
             checked_in_at: new Date()?.toISOString(),
-            checked_out_at: stage === 'out' ? new Date()?.toISOString() : null
+            checked_out_at: stage === 'out' ? new Date()?.toISOString() : null,
+            label: participantLabels?.[participantId] || 'participant'
           };
           attendanceRecords?.push(record);
         }
@@ -443,6 +444,7 @@ export const attendanceService = {
           id,
           checked_in_at,
           checked_out_at,
+          label,
           participant:participants (
             id,
             participant_id,
