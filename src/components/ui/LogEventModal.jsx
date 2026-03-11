@@ -5,6 +5,12 @@ import Button from './Button';
 import { Checkbox } from './Checkbox';
 import { attendanceService } from '../../services/attendanceService';
 
+const ROLE_OPTIONS = [
+  { value: 'participant', label: 'Participant' },
+  { value: 'leader', label: 'Leader' },
+  { value: 'volunteer', label: 'Volunteer' },
+];
+
 const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRemoveParticipant, activeEvent, onEventLogged }) => {
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -12,6 +18,11 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [participantLabels, setParticipantLabels] = useState({});
+
+  const handleLabelChange = (participantId, value) => {
+    setParticipantLabels(prev => ({ ...prev, [participantId]: value }));
+  };
 
   // Populate form fields when modal opens with active event data
   useEffect(() => {
@@ -21,6 +32,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
       setEventCategory(activeEvent?.eventCategory || '');
       setNotes('');
       setError('');
+      setParticipantLabels({});
     }
   }, [isOpen, activeEvent]);
 
@@ -159,6 +171,9 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                   <th className="px-8 py-5 text-left text-sm font-semibold text-gray-700">
                     Participant
                   </th>
+                  <th className="px-8 py-5 text-left text-sm font-semibold text-gray-700 w-44">
+                    Label
+                  </th>
                   <th className="px-8 py-5 text-left text-sm font-semibold text-gray-700 w-40">
                     Checked Out?
                   </th>
@@ -168,7 +183,8 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                 {loggedParticipants?.length > 0 ? (
                   loggedParticipants?.map((participant) => {
                     const isCheckedOut = participantStages?.[participant?.id] === 'out';
-                    
+                    const label = participantLabels?.[participant?.id] || 'participant';
+
                     return (
                       <tr key={participant?.id} className="border-b border-gray-200">
                         <td className="px-8 py-5">
@@ -184,6 +200,20 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                           {participant?.firstName} {participant?.lastName}
                         </td>
                         <td className="px-8 py-5">
+                          <select
+                            value={label}
+                            onChange={(e) => handleLabelChange(participant?.id, e.target.value)}
+                            disabled={loading}
+                            className="w-full px-3 py-2 border-2 border-gray-300 rounded text-sm text-gray-900 bg-white focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {ROLE_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="px-8 py-5">
                           <div className="flex items-center">
                             <Checkbox
                               checked={isCheckedOut}
@@ -197,7 +227,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                   })
                 ) : (
                   <tr>
-                    <td colSpan="3" className="px-8 py-10 text-center text-sm text-gray-500">
+                    <td colSpan="4" className="px-8 py-10 text-center text-sm text-gray-500">
                       No participants checked in yet
                     </td>
                   </tr>
