@@ -424,7 +424,20 @@ export const attendanceService = {
             onConflict: 'event_id,participant_id'
           });
 
-        if (attendanceError) throw attendanceError;
+        // If label column doesn't exist yet, retry without it
+        if (attendanceError) {
+          if (attendanceError?.code === '42703' && attendanceError?.message?.includes('label')) {
+            const recordsWithoutLabel = attendanceRecords?.map(({ label, ...rest }) => rest);
+            const { error: retryError } = await supabase
+              ?.from('attendance_records')
+              ?.upsert(recordsWithoutLabel, {
+                onConflict: 'event_id,participant_id'
+              });
+            if (retryError) throw retryError;
+          } else {
+            throw attendanceError;
+          }
+        }
       }
 
       return toCamelCase(updatedEvent);
@@ -436,6 +449,7 @@ export const attendanceService = {
 
   // Get archived events with participant attendance data
   async getArchivedEvents() {
+    // Try fetching with the label column first
     const { data, error } = await supabase
       ?.from('events')
       ?.select(`
@@ -458,7 +472,45 @@ export const attendanceService = {
       ?.eq('is_active', false)
       ?.order('event_date', { ascending: false });
 
-    if (error) throw error;
+    // If label column doesn't exist yet (migration pending), fall back without it
+    if (error) {
+      if (error?.code === '42703' && error?.message?.includes('label')) {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          ?.from('events')
+          ?.select(`
+            *,
+            attendance_records (
+              id,
+              checked_in_at,
+              checked_out_at,
+              participant:participants (
+                id,
+                participant_id,
+                first_name,
+                last_name,
+                email,
+                phone
+              )
+            )
+          `)
+          ?.eq('is_active', false)
+          ?.order('event_date', { ascending: false });
+
+        if (fallbackError) throw fallbackError;
+
+        // Inject a default label so the rest of the UI works unchanged
+        const withDefaults = fallbackData?.map(event => ({
+          ...event,
+          attendance_records: event?.attendance_records?.map(r => ({
+            ...r,
+            label: 'participant'
+          }))
+        }));
+        return toCamelCase(withDefaults);
+      }
+      throw error;
+    }
+
     return toCamelCase(data);
   },
 
