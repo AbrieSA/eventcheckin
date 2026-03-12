@@ -326,6 +326,7 @@ export const attendanceService = {
           email: participantData?.email || null,
           phone: participantData?.phone || null,
           date_of_birth: participantData?.dateOfBirth || null,
+          role: participantData?.role || 'Participant',
           allergies_details: participantData?.allergies || null,
           has_allergies: !!participantData?.allergies,
           medical_condition_details: participantData?.medicalConditions || null,
@@ -335,9 +336,11 @@ export const attendanceService = {
           emergency_contact_email: participantData?.ecEmail || null,
           emergency_contact_phone: participantData?.ecPhone || null,
           emergency_contact_relationship_to_minor: participantData?.relationshipToMinor || null,
+          person_to_go_home_with: participantData?.personToGoHomeWith || null,
           media_consent_given: participantData?.mediaConsent || false,
           future_contact_permission_given: participantData?.futureContactConsent || false,
           emergency_treatment_consent_given: participantData?.emergencyTreatmentConsent || false,
+          self_sign_out_permission: participantData?.selfSignOutConsent || false,
           created_at: new Date()?.toISOString()
         };
 
@@ -465,6 +468,7 @@ export const attendanceService = {
       email: participantData?.email,
       phone: participantData?.phone,
       date_of_birth: participantData?.dateOfBirth || null,
+      role: participantData?.role || 'Participant',
       allergies_details: participantData?.allergies || null,
       has_allergies: !!participantData?.allergies,
       medical_condition_details: participantData?.medicalConditions || null,
@@ -473,7 +477,9 @@ export const attendanceService = {
       emergency_contact_surname: participantData?.ecLastName,
       emergency_contact_email: participantData?.ecEmail,
       emergency_contact_phone: participantData?.ecPhone,
-      emergency_contact_relationship_to_minor: participantData?.relationshipToMinor || null
+      emergency_contact_relationship_to_minor: participantData?.relationshipToMinor || null,
+      person_to_go_home_with: participantData?.personToGoHomeWith || null,
+      self_sign_out_permission: participantData?.selfSignOutConsent || false
     };
 
     const { data, error } = await supabase
@@ -496,7 +502,8 @@ export const attendanceService = {
     const fieldMapping = {
       mediaConsent: 'media_consent_given',
       futureContactConsent: 'future_contact_permission_given',
-      emergencyTreatmentConsent: 'emergency_treatment_consent_given'
+      emergencyTreatmentConsent: 'emergency_treatment_consent_given',
+      selfSignOutConsent: 'self_sign_out_permission'
     };
 
     const dbField = fieldMapping?.[consentField];

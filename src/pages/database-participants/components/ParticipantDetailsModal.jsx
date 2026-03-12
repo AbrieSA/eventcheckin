@@ -10,6 +10,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
     firstName: participant?.firstName || '',
     lastName: participant?.lastName || '',
     dateOfBirth: participant?.dateOfBirth || '',
+    role: participant?.role || 'Participant',
     email: participant?.email || '',
     phone: participant?.phone || '',
     allergies: participant?.allergiesDetails || '',
@@ -19,9 +20,11 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
     ecEmail: participant?.emergencyContactEmail || '',
     ecPhone: participant?.emergencyContactPhone || '',
     relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
+    personToGoHomeWith: participant?.personToGoHomeWith || '',
     mediaConsent: participant?.mediaConsentGiven || false,
     futureContactConsent: participant?.futureContactPermissionGiven || false,
-    emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false
+    emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
+    selfSignOutConsent: participant?.selfSignOutPermission || false
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,6 +58,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
         firstName: participant?.firstName || '',
         lastName: participant?.lastName || '',
         dateOfBirth: participant?.dateOfBirth || '',
+        role: participant?.role || 'Participant',
         email: participant?.email || '',
         phone: participant?.phone || '',
         allergies: participant?.allergiesDetails || '',
@@ -64,9 +68,11 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
         ecEmail: participant?.emergencyContactEmail || '',
         ecPhone: participant?.emergencyContactPhone || '',
         relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
+        personToGoHomeWith: participant?.personToGoHomeWith || '',
         mediaConsent: participant?.mediaConsentGiven || false,
         futureContactConsent: participant?.futureContactPermissionGiven || false,
-        emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false
+        emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
+        selfSignOutConsent: participant?.selfSignOutPermission || false
       });
     }
     setIsEditMode(!isEditMode);
@@ -102,6 +108,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
       firstName: participant?.firstName || '',
       lastName: participant?.lastName || '',
       dateOfBirth: participant?.dateOfBirth || '',
+      role: participant?.role || 'Participant',
       email: participant?.email || '',
       phone: participant?.phone || '',
       allergies: participant?.allergiesDetails || '',
@@ -111,9 +118,11 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
       ecEmail: participant?.emergencyContactEmail || '',
       ecPhone: participant?.emergencyContactPhone || '',
       relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
+      personToGoHomeWith: participant?.personToGoHomeWith || '',
       mediaConsent: participant?.mediaConsentGiven || false,
       futureContactConsent: participant?.futureContactPermissionGiven || false,
-      emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false
+      emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
+      selfSignOutConsent: participant?.selfSignOutPermission || false
     });
     setIsEditMode(false);
   };
@@ -251,6 +260,33 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
               {/* Date of Birth */}
               {renderField('Date of Birth', formatDate(participant?.dateOfBirth), 'dateOfBirth', 'date')}
 
+              {/* Role */}
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  Role
+                </label>
+                {isEditMode ? (
+                  <div className="relative">
+                    <select
+                      value={formData?.role || 'Participant'}
+                      onChange={(e) => handleInputChange('role', e?.target?.value)}
+                      className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary appearance-none pr-10"
+                    >
+                      <option value="Participant">Participant</option>
+                      <option value="Volunteer">Volunteer</option>
+                      <option value="Leader">Leader</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                      <Icon name="ChevronDown" size={16} className="text-muted-foreground" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="px-4 py-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground">
+                    {participant?.role || 'Participant'}
+                  </div>
+                )}
+              </div>
+
               {/* Email */}
               {renderField('Email', participant?.email, 'email', 'email')}
 
@@ -317,6 +353,33 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
               {/* Relationship to minor */}
               {renderField('Relationship to minor', participant?.emergencyContactRelationshipToMinor, 'relationshipToMinor')}
 
+              {/* Name of person they can go home with */}
+              <div className="md:col-span-2">
+                {isEditMode ? (
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                      Name of person they can go home with
+                    </label>
+                    <input
+                      type="text"
+                      value={formData?.personToGoHomeWith || ''}
+                      onChange={(e) => handleInputChange('personToGoHomeWith', e?.target?.value)}
+                      className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      placeholder="Enter name"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-2">
+                      Name of person they can go home with
+                    </label>
+                    <div className="px-4 py-3 bg-muted/30 border border-border rounded-lg text-sm text-foreground">
+                      {participant?.personToGoHomeWith || 'N/A'}
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Date created */}
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">
@@ -381,6 +444,23 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
                   className="text-sm font-medium text-foreground cursor-pointer flex-1"
                 >
                   Emergency treatment consent
+                </label>
+              </div>
+
+              {/* Permission to self-sign out */}
+              <div className="flex items-center space-x-3 p-3 bg-muted/30 border border-border rounded-lg">
+                <input
+                  type="checkbox"
+                  id="selfSignOutConsent"
+                  checked={formData?.selfSignOutConsent}
+                  onChange={(e) => handleConsentChange('selfSignOutConsent', e?.target?.checked)}
+                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                />
+                <label
+                  htmlFor="selfSignOutConsent"
+                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                >
+                  Permission to self-sign out
                 </label>
               </div>
             </div>

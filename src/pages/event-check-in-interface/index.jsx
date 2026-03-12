@@ -671,6 +671,10 @@ const EventCheckInInterface = () => {
                                     <span className="text-gray-600">Relationship: </span>
                                     <span className="text-gray-900 font-medium">{participant?.emergencyContactRelationshipToMinor || 'N/A'}</span>
                                   </div>
+                                  <div>
+                                    <span className="text-gray-600">Person to Go Home With: </span>
+                                    <span className="text-gray-900 font-medium">{participant?.personToGoHomeWith || 'N/A'}</span>
+                                  </div>
                                 </div>
                               </div>
 
@@ -748,6 +752,14 @@ const EventCheckInInterface = () => {
                                       className={participant?.futureContactPermissionGiven ? "text-green-600" : "text-gray-400"}
                                     />
                                     <span className="text-gray-600">Future Contact Permission</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Icon 
+                                      name={participant?.selfSignOutPermission ? "CheckCircle" : "XCircle"} 
+                                      size={14} 
+                                      className={participant?.selfSignOutPermission ? "text-green-600" : "text-gray-400"}
+                                    />
+                                    <span className="text-gray-600">Self-Sign-Out</span>
                                   </div>
                                 </div>
                               </div>
@@ -780,6 +792,10 @@ const EventCheckInInterface = () => {
                                     <span className="text-gray-600">Relationship: </span>
                                     <span className="text-gray-900 font-medium">{participant?.emergencyContactRelationshipToMinor || 'N/A'}</span>
                                   </div>
+                                  <div>
+                                    <span className="text-gray-600">Person to Go Home With: </span>
+                                    <span className="text-gray-900 font-medium">{participant?.personToGoHomeWith || 'N/A'}</span>
+                                  </div>
                                 </div>
                               </div>
 
@@ -857,6 +873,14 @@ const EventCheckInInterface = () => {
                                       className={participant?.futureContactPermissionGiven ? "text-green-600" : "text-gray-400"}
                                     />
                                     <span className="text-gray-600">Future Contact Permission</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Icon 
+                                      name={participant?.selfSignOutPermission ? "CheckCircle" : "XCircle"} 
+                                      size={14} 
+                                      className={participant?.selfSignOutPermission ? "text-green-600" : "text-gray-400"}
+                                    />
+                                    <span className="text-gray-600">Self-Sign-Out</span>
                                   </div>
                                 </div>
                               </div>
@@ -1003,6 +1027,10 @@ const EventCheckInInterface = () => {
                                   <span className="text-gray-600">Relationship: </span>
                                   <span className="text-gray-900 font-medium">{participant?.emergencyContactRelationshipToMinor || 'N/A'}</span>
                                 </div>
+                                <div>
+                                  <span className="text-gray-600">Person to Go Home With: </span>
+                                  <span className="text-gray-900 font-medium">{participant?.personToGoHomeWith || 'N/A'}</span>
+                                </div>
                               </div>
                             </div>
 
@@ -1080,6 +1108,14 @@ const EventCheckInInterface = () => {
                                     className={participant?.futureContactPermissionGiven ? "text-green-600" : "text-gray-400"}
                                   />
                                   <span className="text-gray-600">Future Contact Permission</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Icon 
+                                    name={participant?.selfSignOutPermission ? "CheckCircle" : "XCircle"} 
+                                    size={14} 
+                                    className={participant?.selfSignOutPermission ? "text-green-600" : "text-gray-400"}
+                                  />
+                                  <span className="text-gray-600">Self-Sign-Out</span>
                                 </div>
                               </div>
                             </div>
@@ -1166,6 +1202,10 @@ const EventCheckInInterface = () => {
                                     <span className="text-gray-600">Relationship: </span>
                                     <span className="text-gray-900 font-medium">{participant?.emergencyContactRelationshipToMinor || 'N/A'}</span>
                                   </div>
+                                  <div>
+                                    <span className="text-gray-600">Person to Go Home With: </span>
+                                    <span className="text-gray-900 font-medium">{participant?.personToGoHomeWith || 'N/A'}</span>
+                                  </div>
                                 </div>
                               </div>
 
@@ -1243,6 +1283,14 @@ const EventCheckInInterface = () => {
                                       className={participant?.futureContactPermissionGiven ? "text-green-600" : "text-gray-400"}
                                     />
                                     <span className="text-gray-600">Future Contact Permission</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Icon 
+                                      name={participant?.selfSignOutPermission ? "CheckCircle" : "XCircle"} 
+                                      size={14} 
+                                      className={participant?.selfSignOutPermission ? "text-green-600" : "text-gray-400"}
+                                    />
+                                    <span className="text-gray-600">Self-Sign-Out</span>
                                   </div>
                                 </div>
                               </div>
