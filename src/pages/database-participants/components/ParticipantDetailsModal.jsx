@@ -15,6 +15,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
     phone: participant?.phone || '',
     allergies: participant?.allergiesDetails || '',
     medicalConditions: participant?.medicalConditionDetails || '',
+    medicare: participant?.medicare || '',
     ecName: participant?.emergencyContactName || '',
     ecLastName: participant?.emergencyContactSurname || '',
     ecEmail: participant?.emergencyContactEmail || '',
@@ -63,6 +64,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
         phone: participant?.phone || '',
         allergies: participant?.allergiesDetails || '',
         medicalConditions: participant?.medicalConditionDetails || '',
+        medicare: participant?.medicare || '',
         ecName: participant?.emergencyContactName || '',
         ecLastName: participant?.emergencyContactSurname || '',
         ecEmail: participant?.emergencyContactEmail || '',
@@ -113,6 +115,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
       phone: participant?.phone || '',
       allergies: participant?.allergiesDetails || '',
       medicalConditions: participant?.medicalConditionDetails || '',
+      medicare: participant?.medicare || '',
       ecName: participant?.emergencyContactName || '',
       ecLastName: participant?.emergencyContactSurname || '',
       ecEmail: participant?.emergencyContactEmail || '',
@@ -323,14 +326,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
               </div>
 
               {/* Medicare */}
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">
-                  Medicare
-                </label>
-                <div className="px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground">
-                  N/A
-                </div>
-              </div>
+              {renderField('Medicare', participant?.medicare, 'medicare')}
             </div>
           </div>
 
