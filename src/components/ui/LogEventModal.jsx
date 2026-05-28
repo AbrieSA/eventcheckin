@@ -11,6 +11,30 @@ const ROLE_OPTIONS = [
   { value: 'volunteer', label: 'Volunteer' },
 ];
 
+const formatDateForInput = (value) => {
+  if (!value) return '';
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const isoDateMatch = String(value)?.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (isoDateMatch?.[1]) {
+    return isoDateMatch[1];
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate?.getTime())) {
+    return '';
+  }
+
+  const year = parsedDate.getFullYear();
+  const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+  const day = String(parsedDate.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
 const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRemoveParticipant, activeEvent, onEventLogged }) => {
   const [eventName, setEventName] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -24,15 +48,25 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
     setParticipantLabels(prev => ({ ...prev, [participantId]: value }));
   };
 
+  const getDefaultParticipantLabels = () =>
+    (participants || [])?.reduce((labels, participant) => {
+      if (participant?.is18OrOver) {
+        labels[participant.id] = 'volunteer';
+      }
+      return labels;
+    }, {});
+
   // Populate form fields when modal opens with active event data
   useEffect(() => {
     if (isOpen && activeEvent) {
       setEventName(activeEvent?.eventName || '');
-      setEventDate(activeEvent?.eventDate || '');
+      // Native date inputs only render YYYY-MM-DD values.
+      setEventDate(formatDateForInput(activeEvent?.eventDate));
       setEventCategory(activeEvent?.eventCategory || '');
       setNotes('');
       setError('');
-      setParticipantLabels({});
+      // Initialize sensible defaults once when the modal opens.
+      setParticipantLabels(getDefaultParticipantLabels());
     }
   }, [isOpen, activeEvent]);
 
@@ -216,9 +250,10 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                         <td className="px-8 py-5">
                           <div className="flex items-center">
                             <Checkbox
+                              variant="eventStatus"
                               checked={isCheckedOut}
                               disabled
-                              className="w-6 h-6"
+                              size="actionSm"
                             />
                           </div>
                         </td>

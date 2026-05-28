@@ -1,14 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Icon from '../AppIcon';
 import Button from './Button';
 import Input from './Input';
 
+const getTodayDate = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+
+  return `${year}-${month}-${day}`;
+};
+
+const createDefaultFormData = () => ({
+  eventName: '',
+  eventDate: getTodayDate(),
+  eventCategory: ''
+});
+
 const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
-  const [formData, setFormData] = useState({
-    eventName: '',
-    eventDate: '',
-    eventCategory: ''
-  });
+  const [formData, setFormData] = useState(createDefaultFormData);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData(createDefaultFormData());
+    }
+  }, [isOpen]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -19,24 +36,23 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
 
   const handleSubmit = (e) => {
     e?.preventDefault();
-    if (formData?.eventName && formData?.eventDate && formData?.eventCategory) {
-      onCreateEvent(formData);
-      // Reset form
-      setFormData({
-        eventName: '',
-        eventDate: '',
-        eventCategory: ''
+    const trimmedEventName = formData?.eventName?.trim();
+    const trimmedEventCategory = formData?.eventCategory?.trim();
+
+    if (trimmedEventName && formData?.eventDate) {
+      onCreateEvent({
+        ...formData,
+        eventName: trimmedEventName,
+        eventCategory: trimmedEventCategory || null
       });
+      // Reset form
+      setFormData(createDefaultFormData());
     }
   };
 
   const handleCancel = () => {
     // Reset form
-    setFormData({
-      eventName: '',
-      eventDate: '',
-      eventCategory: ''
-    });
+    setFormData(createDefaultFormData());
     onClose();
   };
 
@@ -115,7 +131,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
                 htmlFor="eventCategory"
                 className="block text-sm font-medium text-foreground mb-3">
 
-                Event Category
+                Event Category (Optional)
               </label>
               <Input
                 id="eventCategory"
@@ -123,7 +139,6 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
                 value={formData?.eventCategory}
                 onChange={(e) => handleInputChange('eventCategory', e?.target?.value)}
                 placeholder="Enter event category"
-                required
                 className="w-full" />
 
             </div>
@@ -142,7 +157,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
                 type="submit"
                 variant="primary"
                 className="px-6 py-2.5"
-                disabled={!formData?.eventName || !formData?.eventDate || !formData?.eventCategory}>
+                disabled={!formData?.eventName?.trim() || !formData?.eventDate}>
 
                 Create Event
               </Button>

@@ -10,6 +10,7 @@ import { attendanceService } from '../../services/attendanceService';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
 
+const TRANSITION_DELAY_MS = 1000;
 
 const EventCheckInInterface = () => {
   const navigate = useNavigate();
@@ -201,7 +202,20 @@ const EventCheckInInterface = () => {
       filtered = filtered?.filter((p) => !participantStages?.[p?.id]);
     } else if (activeFilter === 'in') {
       // Show participants who are checked in but not checked out
-      filtered = filtered?.filter((p) => participantStages?.[p?.id] === 'in');
+      filtered = filtered
+        ?.filter((p) => participantStages?.[p?.id] === 'in')
+        ?.sort((a, b) => {
+          const aIsAdult = Boolean(a?.is18OrOver);
+          const bIsAdult = Boolean(b?.is18OrOver);
+
+          if (aIsAdult !== bIsAdult) {
+            return Number(bIsAdult) - Number(aIsAdult);
+          }
+
+          const aName = `${a?.firstName || ''} ${a?.lastName || ''}`?.trim();
+          const bName = `${b?.firstName || ''} ${b?.lastName || ''}`?.trim();
+          return aName.localeCompare(bName);
+        });
     } else if (activeFilter === 'out') {
       // Show participants who are checked out
       filtered = filtered?.filter((p) => participantStages?.[p?.id] === 'out');
@@ -209,6 +223,10 @@ const EventCheckInInterface = () => {
 
     return filtered;
   }, [searchQuery, participants, activeFilter, participantStages]);
+
+  const checkedInCount = useMemo(() =>
+    Object.values(participantStages)?.filter((stage) => stage === 'in')?.length
+  , [participantStages]);
 
   // Handle checkbox in Check-In tab - moves to In tab
   const handleCheckInToggle = async (participantId, checked) => {
@@ -218,7 +236,7 @@ const EventCheckInInterface = () => {
       // Mark as pending transition
       setPendingTransitions((prev) => ({ ...prev, [participantId]: Date.now() }));
 
-      // Set timeout for 2-second delay
+      // Set timeout for a short visual confirmation before moving tabs
       const timeoutId = setTimeout(async () => {
         // Move to 'in' column after delay
         setParticipantStages((prev) => ({
@@ -248,7 +266,7 @@ const EventCheckInInterface = () => {
             return updated;
           });
         }
-      }, 2000);
+      }, TRANSITION_DELAY_MS);
 
       // Store timeout ID for potential cancellation
       transitionTimeoutsRef.current[participantId] = timeoutId;
@@ -293,7 +311,7 @@ const EventCheckInInterface = () => {
       // Mark as pending transition
       setPendingTransitions((prev) => ({ ...prev, [participantId]: Date.now() }));
 
-      // Set timeout for 2-second delay
+      // Set timeout for a short visual confirmation before moving tabs
       const timeoutId = setTimeout(async () => {
         // Move to 'out' column after delay
         setParticipantStages((prev) => ({
@@ -322,7 +340,7 @@ const EventCheckInInterface = () => {
             [participantId]: 'in'
           }));
         }
-      }, 2000);
+      }, TRANSITION_DELAY_MS);
 
       // Store timeout ID for potential cancellation
       transitionTimeoutsRef.current[participantId] = timeoutId;
@@ -449,7 +467,7 @@ const EventCheckInInterface = () => {
     if (!pendingStartTime) return 'transparent';
 
     const elapsed = Date.now() - pendingStartTime;
-    const progress = Math.min(elapsed / 2000, 1); // 0 to 1 over 2 seconds
+    const progress = Math.min(elapsed / TRANSITION_DELAY_MS, 1); // 0 to 1 over the transition delay
     
     // Gradual green: from rgba(34, 197, 94, 0) to rgba(34, 197, 94, 0.3)
     const opacity = progress * 0.3;
@@ -516,7 +534,7 @@ const EventCheckInInterface = () => {
               className={`flex-1 px-6 py-3 font-medium transition-colors ${
               activeFilter === 'in' ? 'bg-gray-300 text-gray-900' : 'bg-white text-gray-700 border-t border-b border-gray-300'}`
               }>
-              In
+              In ({checkedInCount})
             </button>
             <button
               onClick={() => setActiveFilter('out')}
@@ -583,8 +601,10 @@ const EventCheckInInterface = () => {
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-center">
                             <Checkbox
+                              variant="eventAction"
+                              size="action"
                               onChange={(e) => handleCheckInToggle(participant?.id, e?.target?.checked)}
-                              className="w-12 h-12" />
+                            />
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -929,10 +949,10 @@ const EventCheckInInterface = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-center">
                           <Checkbox
+                          variant="eventAction"
                           checked={isCheckedOut}
                           onChange={(e) => handleInTabToggle(participant?.id, e?.target?.checked)}
-                          size="lg"
-                          className="w-6 h-6" />
+                          size="action" />
                         </div>
                       </td>
                       <td className="px-6 py-4">
