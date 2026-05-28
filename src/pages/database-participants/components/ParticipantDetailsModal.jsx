@@ -213,14 +213,14 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="sticky top-0 bg-card border-b border-border px-8 py-6 flex items-center justify-between">
+        <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
           <h2 className="text-xl font-bold text-foreground">Attendee Details</h2>
           <div className="flex items-center space-x-2">
             <Button
-              variant="outline"
+              variant="surface"
               size="sm"
               className="text-sm"
               onClick={handleToggleEdit}
@@ -229,27 +229,28 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
               {isEditMode ? 'Cancel Edit' : 'Edit Details Toggle'}
             </Button>
             <Button
-              variant="outline"
+              variant="surfaceDanger"
               size="sm"
-              className="text-sm text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+              className="text-sm"
               onClick={handleDeleteClick}
               disabled={isSaving || isDeleting}
             >
               {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
-            <button
+            <Button
               onClick={onClose}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              variant="surface"
+              size="icon"
+              className="rounded-full"
+              iconName="X"
               aria-label="Close"
               disabled={isSaving}
-            >
-              <Icon name="X" size={20} className="text-muted-foreground" />
-            </button>
+            />
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-8 py-8 space-y-8">
+        <div className="space-y-8 px-6 py-6 sm:px-8">
           {/* Attendee Details Section */}
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-5">Attendee Details</h3>

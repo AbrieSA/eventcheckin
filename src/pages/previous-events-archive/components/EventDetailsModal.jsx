@@ -1,5 +1,4 @@
 import React from 'react';
-import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const LABEL_STYLES = {
@@ -49,29 +48,30 @@ const EventDetailsModal = ({ event, onClose }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header with close button */}
-        <div className="flex items-center justify-between p-8 border-b border-gray-200">
+        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 sm:px-8">
           <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
             Event Details
           </h2>
-          <button
+          <Button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            variant="surface"
+            size="icon"
+            className="rounded-full"
+            iconName="X"
             aria-label="Close modal"
-          >
-            <Icon name="X" size={24} />
-          </button>
+          />
         </div>
 
         {/* Event Details Section */}
-        <div className="p-8 border-b border-gray-200">
+        <div className="border-b border-slate-200 px-6 py-6 sm:px-8">
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div>
               <label className="text-sm font-medium text-gray-700 block mb-2">Event Name</label>
@@ -97,7 +97,7 @@ const EventDetailsModal = ({ event, onClose }) => {
         </div>
 
         {/* Participants Section */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8">
           <h3 className="text-sm font-medium text-gray-700 mb-4">Participants</h3>
           <div className="space-y-3">
             {event?.attendanceRecords?.length === 0 ? (
@@ -110,7 +110,7 @@ const EventDetailsModal = ({ event, onClose }) => {
                 return (
                   <div
                     key={record?.id}
-                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50/80 p-4"
                   >
                     <div className="flex items-center gap-3 flex-1">
                       <div className="text-gray-900 font-medium">
@@ -134,11 +134,11 @@ const EventDetailsModal = ({ event, onClose }) => {
         </div>
 
         {/* Footer with Export Button */}
-        <div className="p-8 border-t border-gray-200">
+        <div className="border-t border-slate-200 px-6 py-5 sm:px-8">
           <Button
-            variant="outline"
+            variant="surface"
             onClick={handleExport}
-            className="w-full"
+            className="w-full rounded-full"
           >
             Export List
           </Button>

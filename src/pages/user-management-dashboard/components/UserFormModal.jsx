@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import Input from '../../../components/ui/Input';
 import { userManagementService } from '../../../services/userManagementService';
@@ -65,23 +64,25 @@ const UserFormModal = ({ user, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-border">
+        <div className="flex items-center justify-between border-b border-border/70 px-6 py-5 sm:px-8">
           <h2 className="text-xl font-heading font-bold text-foreground">
             {user ? 'Edit User' : 'Add New User'}
           </h2>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-          >
-            <Icon name="X" size={20} color="var(--color-foreground)" />
-          </button>
+            variant="surface"
+            size="icon"
+            className="rounded-full"
+            iconName="X"
+            aria-label="Close modal"
+          />
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 sm:px-8">
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-foreground mb-3">
@@ -167,14 +168,16 @@ const UserFormModal = ({ user, onClose, onSave }) => {
               type="button"
               onClick={onClose}
               disabled={loading}
-              className="px-6 py-2 border border-border hover:bg-muted rounded-lg transition-colors"
+              variant="surface"
+              className="rounded-full px-6 py-2"
             >
               Cancel
             </Button>
             <Button
               type="submit"
+              variant="primary"
               disabled={loading}
-              className="bg-primary hover:bg-primary/90 text-white font-semibold px-6 py-2 rounded-lg transition-colors"
+              className="rounded-full px-6 py-2"
             >
               {loading ? 'Saving...' : user ? 'Update User' : 'Create User'}
             </Button>

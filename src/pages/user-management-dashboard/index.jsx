@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
+import BackButton from '../../components/ui/BackButton';
 import Input from '../../components/ui/Input';
 import { userManagementService } from '../../services/userManagementService';
 import UserFormModal from './components/UserFormModal';
@@ -189,13 +190,12 @@ const UserManagementDashboard = () => {
       <header className="bg-card border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 sm:h-20">
-            <button
+            <BackButton
               onClick={() => navigate('/home-dashboard')}
-              className="flex items-center space-x-2 sm:space-x-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-2 hover:bg-primary/5 transition-colors"
+              className="h-11 px-4"
             >
-              <Icon name="ArrowLeft" size={24} color="var(--color-primary)" />
-              <span className="text-lg font-semibold text-foreground">Back to Dashboard</span>
-            </button>
+              Back
+            </BackButton>
           </div>
         </div>
       </header>
@@ -210,7 +210,7 @@ const UserManagementDashboard = () => {
         </div>
 
         {/* Filters and Actions */}
-        <div className="bg-card border border-border rounded-lg p-6 mb-6">
+        <div className="mb-6 rounded-[28px] border border-border/80 bg-card/95 p-6 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="md:col-span-2">
@@ -271,7 +271,7 @@ const UserManagementDashboard = () => {
         </div>
 
         {/* Users Table */}
-        <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="overflow-hidden rounded-[28px] border border-border/80 bg-card/95 shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-muted border-b border-border">

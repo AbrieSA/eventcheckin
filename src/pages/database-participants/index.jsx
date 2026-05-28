@@ -222,7 +222,7 @@ const DatabaseParticipants = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Search Filters and Options */}
-        <div className="bg-card rounded-lg border border-border shadow-sm p-4 sm:p-6 mb-6 pt-[15px] pb-0">
+        <div className="mb-6 rounded-[28px] border border-border/80 bg-card/95 p-4 pt-[15px] pb-0 shadow-sm backdrop-blur-sm sm:p-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 mb-4">
             {/* Participant Name Filter */}
             <div className="flex-1 w-full sm:w-auto">
@@ -248,12 +248,12 @@ const DatabaseParticipants = () => {
                 Options
               </Button>
               {showOptions &&
-              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-xl z-50">
+              <div className="absolute right-0 z-50 mt-2 w-56 rounded-2xl border border-gray-200 bg-white/95 shadow-xl backdrop-blur-sm dark:border-gray-700 dark:bg-gray-800/95">
                   <button
                   onClick={() => {
                     handleAddParticipant();
                   }}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors rounded-t-lg flex items-center space-x-3 text-gray-900 dark:text-gray-100 font-medium">
+                  className="flex w-full items-center space-x-3 rounded-t-2xl px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700">
                     <Icon name="UserPlus" size={18} className="text-gray-700 dark:text-gray-300" />
                     <span className="text-base">Add Participant</span>
                   </button>
@@ -261,7 +261,7 @@ const DatabaseParticipants = () => {
                   onClick={() => {
                     handleExport();
                   }}
-                  className="w-full text-left px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-3 text-gray-900 dark:text-gray-100 font-medium">
+                  className="flex w-full items-center space-x-3 rounded-b-2xl px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700">
 
                     <Icon name="Download" size={18} className="text-gray-700 dark:text-gray-300" />
                     <span className="text-base">List export</span>
@@ -273,7 +273,7 @@ const DatabaseParticipants = () => {
         </div>
 
         {/* Participants Table */}
-        <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
+        <div className="overflow-hidden rounded-[28px] border border-border/80 bg-card/95 shadow-sm">
           {loading ?
           <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

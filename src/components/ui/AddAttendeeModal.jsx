@@ -164,23 +164,24 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all"
+          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-sm transform transition-all"
           onClick={(e) => e?.stopPropagation()}>
 
           {/* Header */}
-          <div className="sticky top-0 bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between">
+          <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
             <h2 className="text-xl font-semibold text-gray-900">Add Attendee</h2>
-            <button
+            <Button
               onClick={handleClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
-              aria-label="Close modal">
-
-              <Icon name="X" size={20} color="#6B7280" />
-            </button>
+              variant="surface"
+              size="icon"
+              className="rounded-full"
+              iconName="X"
+              aria-label="Close modal"
+            />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-8 px-6 py-6 sm:px-8">
             {/* Error Message */}
             {submitError &&
             <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-md flex items-start gap-2">
@@ -563,18 +564,20 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 border-t border-border/70 pt-6">
               <Button
                 type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+                variant="surface"
+                className="rounded-full px-5 py-2 text-gray-700"
                 disabled={isSubmitting}>
 
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                variant="primary"
+                className="rounded-full px-5 py-2 disabled:cursor-not-allowed flex items-center gap-2"
                 disabled={isSubmitting}>
 
                 {isSubmitting ?

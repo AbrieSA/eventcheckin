@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Icon from '../AppIcon';
 import Button from './Button';
 import Input from './Input';
 
@@ -69,25 +68,26 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md transform transition-all"
+          className="w-full max-w-md rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-sm transform transition-all"
           onClick={(e) => e?.stopPropagation()}>
 
           {/* Header */}
-          <div className="flex items-center justify-between p-8 border-b border-border pr-8 py-2.5">
+          <div className="flex items-center justify-between border-b border-border/70 px-6 py-5 sm:px-8">
             <h2 className="text-2xl font-heading font-semibold text-foreground">
               Create New Event
             </h2>
-            <button
+            <Button
               onClick={handleCancel}
-              className="p-2 hover:bg-muted rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-              aria-label="Close modal">
-
-              <Icon name="X" size={20} color="var(--color-muted-foreground)" />
-            </button>
+              variant="surface"
+              size="icon"
+              className="rounded-full"
+              iconName="X"
+              aria-label="Close modal"
+            />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6 py-[15px]">
+          <form onSubmit={handleSubmit} className="space-y-6 px-6 py-6 sm:px-8">
             {/* Event Name */}
             <div>
               <label
@@ -148,17 +148,15 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
               <Button
                 type="button"
                 onClick={handleCancel}
-                variant="outline"
-                className="px-6 py-2.5">
-
+                variant="surface"
+                className="rounded-full px-6 py-2.5">
                 Cancel
               </Button>
               <Button
                 type="submit"
                 variant="primary"
-                className="px-6 py-2.5"
+                className="rounded-full px-6 py-2.5"
                 disabled={!formData?.eventName?.trim() || !formData?.eventDate}>
-
                 Create Event
               </Button>
             </div>

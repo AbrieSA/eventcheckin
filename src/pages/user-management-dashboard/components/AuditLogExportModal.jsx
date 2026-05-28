@@ -36,24 +36,26 @@ const AuditLogExportModal = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-lg shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-border">
+        <div className="flex items-center justify-between border-b border-border/70 px-6 py-5 sm:px-8">
           <h2 className="text-xl font-heading font-bold text-foreground">
             Export Audit Logs
           </h2>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
+            variant="surface"
+            size="icon"
+            className="rounded-full"
             disabled={loading}
-          >
-            <Icon name="X" size={20} color="var(--color-foreground)" />
-          </button>
+            iconName="X"
+            aria-label="Close modal"
+          />
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-6">
+        <div className="space-y-6 px-6 py-6 sm:px-8">
           <p className="text-sm text-muted-foreground">
             Export audit logs to CSV format. Leave dates empty to export all logs.
           </p>
@@ -96,7 +98,7 @@ const AuditLogExportModal = ({ onClose }) => {
           {/* Info */}
           <div className="bg-blue-50 border border-blue-200 text-blue-700 px-5 py-4 rounded-lg text-sm">
             <div className="flex items-start space-x-2">
-              <Icon name="Info" size={16} color="#2563eb" className="mt-0.5 flex-shrink-0" />
+              <span className="mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700">i</span>
               <div>
                 <p className="font-semibold mb-1">What will be exported:</p>
                 <ul className="list-disc list-inside space-y-1 text-xs">
@@ -111,22 +113,24 @@ const AuditLogExportModal = ({ onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-8 border-t border-border">
+        <div className="flex items-center justify-end space-x-3 border-t border-border/70 px-6 py-5 sm:px-8">
           <Button
             onClick={onClose}
             disabled={loading}
-            className="px-4 py-2 border border-border text-foreground hover:bg-muted rounded-lg transition-colors"
+            variant="surface"
+            className="rounded-full px-4 py-2"
           >
             Cancel
           </Button>
           <Button
             onClick={handleExport}
             disabled={loading}
-            className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors flex items-center space-x-2"
+            variant="primary"
+            className="rounded-full px-4 py-2 flex items-center space-x-2"
           >
             {loading ? (
               <>
-                <Icon name="Loader" size={16} color="white" className="animate-spin" />
+                <Icon name="Loader2" size={16} color="white" className="animate-spin" />
                 <span>Exporting...</span>
               </>
             ) : (

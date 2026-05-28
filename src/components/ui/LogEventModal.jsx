@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Icon from '../AppIcon';
 import Input from './Input';
 import Button from './Button';
+import BackButton from './BackButton';
 import { Checkbox } from './Checkbox';
 import { attendanceService } from '../../services/attendanceService';
 
@@ -126,25 +126,24 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="p-8 border-b border-gray-200">
+        <div className="border-b border-border/70 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-4">
-            <button
+            <BackButton
               onClick={onClose}
-              className="flex items-center justify-center w-12 h-12 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors"
+              iconOnly
+              className="h-11 w-11"
               aria-label="Close modal"
               disabled={loading}
-            >
-              <Icon name="ArrowLeft" size={20} className="text-gray-600" />
-            </button>
+            />
             <h2 className="text-xl font-semibold text-gray-900">Log Event</h2>
           </div>
         </div>
 
         {/* Form Fields */}
-        <div className="p-8">
+        <div className="px-6 py-6 sm:px-8">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-600">{error}</p>
@@ -158,7 +157,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                 placeholder="Event Name"
                 value={eventName}
                 onChange={(e) => setEventName(e?.target?.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded"
+                className="w-full border-slate-200 bg-slate-50/80"
                 disabled={loading}
               />
             </div>
@@ -168,7 +167,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                 placeholder="Event Date"
                 value={eventDate}
                 onChange={(e) => setEventDate(e?.target?.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded"
+                className="w-full border-slate-200 bg-slate-50/80"
                 disabled={loading}
               />
             </div>
@@ -178,7 +177,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                 placeholder="Event Category"
                 value={eventCategory}
                 onChange={(e) => setEventCategory(e?.target?.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded"
+                className="w-full border-slate-200 bg-slate-50/80"
                 disabled={loading}
               />
             </div>
@@ -188,17 +187,17 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                 placeholder="Notes"
                 value={notes}
                 onChange={(e) => setNotes(e?.target?.value)}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded"
+                className="w-full border-slate-200 bg-slate-50/80"
                 disabled={loading}
               />
             </div>
           </div>
 
           {/* Participants Table */}
-          <div className="border-2 border-gray-300 rounded-lg overflow-hidden mb-8">
+          <div className="mb-8 overflow-hidden rounded-[24px] border border-slate-200">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-gray-300 bg-gray-50">
+                <tr className="border-b border-slate-200 bg-slate-50/80">
                   <th className="px-8 py-5 text-left text-sm font-semibold text-gray-700 w-32">
                     Remove
                   </th>
@@ -224,7 +223,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                         <td className="px-8 py-5">
                           <button
                             onClick={() => onRemoveParticipant?.(participant?.id)}
-                            className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-full bg-red-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={loading}
                           >
                             Remove
@@ -238,7 +237,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
                             value={label}
                             onChange={(e) => handleLabelChange(participant?.id, e.target.value)}
                             disabled={loading}
-                            className="w-full px-3 py-2 border-2 border-gray-300 rounded text-sm text-gray-900 bg-white focus:outline-none focus:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {ROLE_OPTIONS.map((opt) => (
                               <option key={opt.value} value={opt.value}>
@@ -275,14 +274,16 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
           <div className="flex justify-end gap-4">
             <Button
               onClick={onClose}
-              className="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 font-medium rounded hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="surface"
+              className="rounded-full px-6 py-3 text-gray-700 disabled:cursor-not-allowed"
               disabled={loading}
             >
               Cancel
             </Button>
             <Button
               onClick={handleLogEvent}
-              className="px-6 py-3 bg-blue-600 text-white font-medium rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="primary"
+              className="rounded-full px-6 py-3 disabled:cursor-not-allowed"
               disabled={loading}
             >
               {loading ? 'Logging...' : 'Log Event'}

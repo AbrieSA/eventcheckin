@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import { Checkbox } from '../../../components/ui/Checkbox';
 
@@ -115,10 +114,10 @@ const ExportModal = ({ participants, onClose }) => {
   const allSelected = availableColumns?.every(col => selectedColumns?.[col?.key]);
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[30px] border border-gray-200 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)] dark:border-gray-700 dark:bg-gray-800/95">
         {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5 dark:border-gray-700 sm:px-8">
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               What info do you want to export?
@@ -127,17 +126,18 @@ const ExportModal = ({ participants, onClose }) => {
               Select the columns you want to include in the CSV export
             </p>
           </div>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+            variant="surface"
+            size="icon"
+            className="rounded-full dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+            iconName="X"
             aria-label="Close"
-          >
-            <Icon name="X" size={24} className="text-gray-500 dark:text-gray-400" />
-          </button>
+          />
         </div>
 
         {/* Export Button and Select All */}
-        <div className="flex items-center justify-between p-8 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/90 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/90 sm:px-8">
           <button
             onClick={handleSelectAll}
             className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
@@ -161,12 +161,12 @@ const ExportModal = ({ participants, onClose }) => {
         </div>
 
         {/* Column Selection List */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div className="flex-1 overflow-y-auto px-6 py-6 sm:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {availableColumns?.map((column) => (
               <div
                 key={column?.key}
-                className="flex items-center space-x-3 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                className="flex items-center space-x-3 rounded-2xl p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50"
               >
                 <Checkbox
                   checked={selectedColumns?.[column?.key]}
@@ -185,18 +185,21 @@ const ExportModal = ({ participants, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-8 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div className="flex items-center justify-end space-x-3 border-t border-gray-200 bg-gray-50/90 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/90 sm:px-8">
           <Button
-            variant="outline"
+            variant="surface"
             onClick={onClose}
+            className="rounded-full"
           >
             Cancel
           </Button>
           <Button
+            variant="primary"
             onClick={handleExport}
             disabled={selectedCount === 0}
             iconName="Download"
             iconPosition="left"
+            className="rounded-full"
           >
             Export {selectedCount} Column{selectedCount !== 1 ? 's' : ''}
           </Button>

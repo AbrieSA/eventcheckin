@@ -1,5 +1,4 @@
 import React from 'react';
-import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 
 const UserDetailsModal = ({ user, onClose }) => {
@@ -30,23 +29,25 @@ const UserDetailsModal = ({ user, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-2xl shadow-xl max-w-md w-full">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-md rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="flex items-center justify-between p-8 border-b border-border">
+        <div className="flex items-center justify-between border-b border-border/70 px-6 py-5 sm:px-8">
           <h2 className="text-xl font-heading font-bold text-foreground">
             User Details
           </h2>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 hover:bg-muted rounded-lg transition-colors"
-          >
-            <Icon name="X" size={20} color="var(--color-foreground)" />
-          </button>
+            variant="surface"
+            size="icon"
+            className="rounded-full"
+            iconName="X"
+            aria-label="Close modal"
+          />
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-6">
+        <div className="space-y-6 px-6 py-6 sm:px-8">
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-1">
@@ -126,10 +127,11 @@ const UserDetailsModal = ({ user, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end p-8 border-t border-border">
+        <div className="flex items-center justify-end border-t border-border/70 px-6 py-5 sm:px-8">
           <Button
             onClick={onClose}
-            className="px-6 py-2 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-colors"
+            variant="primary"
+            className="rounded-full px-6 py-2"
           >
             Close
           </Button>

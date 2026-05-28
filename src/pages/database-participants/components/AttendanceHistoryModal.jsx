@@ -72,35 +72,37 @@ const AttendanceHistoryModal = ({ participant, onClose }) => {
   const fullName = `${participant?.firstName || ''} ${participant?.lastName || ''}`?.trim();
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-card rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="sticky top-0 bg-card border-b border-border px-8 py-6 flex items-center justify-between">
+        <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
           <h2 className="text-xl font-bold text-foreground">
             {fullName} - Attendance History
           </h2>
           <div className="flex items-center space-x-2">
             <Button
-              variant="outline"
+              variant="surface"
               size="sm"
               onClick={handleExport}
               disabled={loading || attendance?.length === 0}
               iconName="Download"
+              className="rounded-full"
             >
               Export CSV
             </Button>
-            <button
+            <Button
               onClick={onClose}
-              className="p-2 hover:bg-muted rounded-lg transition-colors"
+              variant="surface"
+              size="icon"
+              className="rounded-full"
+              iconName="X"
               aria-label="Close"
-            >
-              <Icon name="X" size={20} className="text-muted-foreground" />
-            </button>
+            />
           </div>
         </div>
 
         {/* Content */}
-        <div className="px-8 py-8">
+        <div className="px-6 py-6 sm:px-8">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -116,7 +118,7 @@ const AttendanceHistoryModal = ({ participant, onClose }) => {
               {attendance?.map((record, index) => (
                 <div
                   key={record?.id || index}
-                  className="bg-muted/30 border border-border rounded-lg p-5 hover:bg-muted/50 transition-colors"
+                  className="rounded-2xl border border-border/80 bg-muted/30 p-5 transition-colors hover:bg-muted/50"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -136,7 +138,7 @@ const AttendanceHistoryModal = ({ participant, onClose }) => {
 
         {/* Footer */}
         {!loading && attendance?.length > 0 && (
-          <div className="sticky bottom-0 bg-card border-t border-border px-8 py-5">
+          <div className="sticky bottom-0 border-t border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
             <p className="text-sm text-muted-foreground">
               Total Events Attended: <span className="font-semibold text-foreground">{attendance?.length}</span>
             </p>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Icon from '../../components/AppIcon';
 import Input from '../../components/ui/Input';
+import BackButton from '../../components/ui/BackButton';
 import EventDetailsModal from './components/EventDetailsModal';
 import { attendanceService } from '../../services/attendanceService';
 
@@ -74,18 +74,23 @@ const PreviousEventsArchive = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 p-4 sm:p-6 lg:p-8">
       {/* Back Button */}
-      <div className="max-w-6xl mx-auto mb-6">
-        <button
+      <div className="max-w-6xl mx-auto mb-4">
+        <BackButton
           onClick={() => navigate('/home-dashboard')}
-          className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-primary">
-          <Icon name="ArrowLeft" size={20} color="#374151" />
-        </button>
+          className="shadow-sm"
+        >
+          Back
+        </BackButton>
       </div>
 
       {/* Main Modal Container */}
-      <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+      <div className="max-w-6xl mx-auto rounded-[32px] border border-slate-200/80 bg-white/92 p-6 shadow-sm backdrop-blur-sm sm:p-8">
+        <div className="mb-6">
+          <h1 className="text-3xl font-heading font-semibold text-slate-900">Archived Events</h1>
+          <p className="mt-2 text-sm text-slate-500">Search past events and open a cleaner event summary modal from here.</p>
+        </div>
         {/* Filters Row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           {/* Event Name Search */}
@@ -130,19 +135,19 @@ const PreviousEventsArchive = () => {
               {error}
             </div>
           ) : (
-            <table className="w-full">
+            <table className="w-full overflow-hidden">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                <tr className="border-b border-slate-200">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
                     Event Name
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
                     Date
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
                     Category
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-gray-700">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
                     Attended
                   </th>
                 </tr>
@@ -152,18 +157,18 @@ const PreviousEventsArchive = () => {
                   filteredEvents?.map((event) =>
                     <tr
                       key={event?.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                      <td className="py-4 px-4 text-sm text-blue-600 hover:text-blue-800 cursor-pointer underline"
+                      className="border-b border-slate-100 transition-colors hover:bg-slate-50/80">
+                      <td className="cursor-pointer py-4 px-4 text-sm font-medium text-primary underline-offset-2 hover:text-primary/80 hover:underline"
                         onClick={() => handleEventClick(event)}>
                         {event?.eventName}
                       </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
+                      <td className="py-4 px-4 text-sm text-slate-600">
                         {event?.eventDate ? new Date(event?.eventDate)?.toLocaleDateString('en-GB') : 'N/A'}
                       </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
+                      <td className="py-4 px-4 text-sm text-slate-600">
                         {event?.category || 'N/A'}
                       </td>
-                      <td className="py-4 px-4 text-sm text-gray-600">
+                      <td className="py-4 px-4 text-sm text-slate-600">
                         {event?.attendanceRecords?.length || 0}
                       </td>
                     </tr>
