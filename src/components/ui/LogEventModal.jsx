@@ -127,7 +127,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
         <div className="border-b border-border/70 px-6 py-5 sm:px-8">
           <div className="flex items-center gap-4">

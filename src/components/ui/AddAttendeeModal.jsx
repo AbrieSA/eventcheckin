@@ -164,11 +164,11 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-sm transform transition-all"
+          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] transform transition-all"
           onClick={(e) => e?.stopPropagation()}>
 
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
+          <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
             <h2 className="text-xl font-semibold text-gray-900">Add Attendee</h2>
             <Button
               onClick={handleClose}

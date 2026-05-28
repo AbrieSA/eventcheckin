@@ -68,7 +68,7 @@ const EventModal = ({ isOpen, onClose, onCreateEvent }) => {
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="w-full max-w-md rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)] backdrop-blur-sm transform transition-all"
+          className="w-full max-w-md rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] transform transition-all"
           onClick={(e) => e?.stopPropagation()}>
 
           {/* Header */}

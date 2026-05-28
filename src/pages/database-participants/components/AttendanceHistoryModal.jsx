@@ -73,9 +73,9 @@ const AttendanceHistoryModal = ({ participant, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
+        <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
           <h2 className="text-xl font-bold text-foreground">
             {fullName} - Attendance History
           </h2>
@@ -138,7 +138,7 @@ const AttendanceHistoryModal = ({ participant, onClose }) => {
 
         {/* Footer */}
         {!loading && attendance?.length > 0 && (
-          <div className="sticky bottom-0 border-t border-border/70 bg-card/95 px-6 py-5 backdrop-blur-sm sm:px-8">
+          <div className="sticky bottom-0 border-t border-border/70 bg-white px-6 py-5 sm:px-8">
             <p className="text-sm text-muted-foreground">
               Total Events Attended: <span className="font-semibold text-foreground">{attendance?.length}</span>
             </p>

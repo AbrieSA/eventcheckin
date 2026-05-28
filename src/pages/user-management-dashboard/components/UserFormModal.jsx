@@ -65,7 +65,7 @@ const UserFormModal = ({ user, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[30px] border border-border/80 bg-card/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
+      <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-border/70 px-6 py-5 sm:px-8">
           <h2 className="text-xl font-heading font-bold text-foreground">

@@ -54,7 +54,7 @@ const EventDetailsModal = ({ event, onClose }) => {
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[30px] border border-slate-200/80 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[30px] border border-slate-200/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header with close button */}
         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5 sm:px-8">
           <h2 id="modal-title" className="text-xl font-semibold text-gray-900">

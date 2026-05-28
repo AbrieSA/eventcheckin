@@ -115,7 +115,7 @@ const ExportModal = ({ participants, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[30px] border border-gray-200 bg-white/95 shadow-[0_24px_80px_rgba(15,23,42,0.16)] dark:border-gray-700 dark:bg-gray-800/95">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-[30px] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] dark:border-gray-700 dark:bg-gray-800">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5 dark:border-gray-700 sm:px-8">
           <div>
@@ -137,7 +137,7 @@ const ExportModal = ({ participants, onClose }) => {
         </div>
 
         {/* Export Button and Select All */}
-        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50/90 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/90 sm:px-8">
+        <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-5 dark:border-gray-700 dark:bg-gray-900 sm:px-8">
           <button
             onClick={handleSelectAll}
             className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
@@ -185,7 +185,7 @@ const ExportModal = ({ participants, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 border-t border-gray-200 bg-gray-50/90 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/90 sm:px-8">
+        <div className="flex items-center justify-end space-x-3 border-t border-gray-200 bg-gray-50 px-6 py-5 dark:border-gray-700 dark:bg-gray-900 sm:px-8">
           <Button
             variant="surface"
             onClick={onClose}
