@@ -305,12 +305,7 @@ export const attendanceService = {
           throw fetchError;
         }
 
-        let nextNumber = nextNumberData || 1;
-
-        // Add random offset on retry to avoid collision
-        if (attempt > 0) {
-          nextNumber += Math.floor(Math.random() * 50) + (attempt * 20);
-        }
+        const nextNumber = nextNumberData || 1;
 
         // Generate participant_id in format: KID2026XXX
         const year = new Date()?.getFullYear();
@@ -356,7 +351,6 @@ export const attendanceService = {
           if (error?.code === '23505' && error?.message?.includes('participant_id')) {
             lastError = error;
             console.warn(`Attempt ${attempt + 1}: Duplicate participant_id ${participantId}, retrying...`);
-            // Retry with a different ID
             continue;
           }
           // Other errors should be thrown immediately
