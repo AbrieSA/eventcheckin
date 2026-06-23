@@ -333,6 +333,7 @@ export const attendanceService = {
           emergency_contact_phone: participantData?.ecPhone || null,
           emergency_contact_relationship_to_minor: participantData?.relationshipToMinor || null,
           person_to_go_home_with: participantData?.personToGoHomeWith || null,
+          form_received: participantData?.formReceived || false,
           media_consent_given: participantData?.mediaConsent || false,
           future_contact_permission_given: participantData?.futureContactConsent || false,
           emergency_treatment_consent_given: participantData?.emergencyTreatmentConsent || false,
@@ -529,6 +530,10 @@ export const attendanceService = {
       emergency_contact_phone: participantData?.ecPhone,
       emergency_contact_relationship_to_minor: participantData?.relationshipToMinor || null,
       person_to_go_home_with: participantData?.personToGoHomeWith || null,
+      form_received: participantData?.formReceived || false,
+      media_consent_given: participantData?.mediaConsent || false,
+      future_contact_permission_given: participantData?.futureContactConsent || false,
+      emergency_treatment_consent_given: participantData?.emergencyTreatmentConsent || false,
       self_sign_out_permission: participantData?.selfSignOutConsent || false
     };
 
@@ -550,6 +555,7 @@ export const attendanceService = {
   async updateParticipantConsent(participantId, consentField, value) {
     // Map camelCase field names to snake_case database columns
     const fieldMapping = {
+      formReceived: 'form_received',
       mediaConsent: 'media_consent_given',
       futureContactConsent: 'future_contact_permission_given',
       emergencyTreatmentConsent: 'emergency_treatment_consent_given',

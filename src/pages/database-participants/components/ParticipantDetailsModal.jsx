@@ -3,30 +3,42 @@ import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import { attendanceService } from '../../../services/attendanceService';
 
-const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) => {
-  const [isEditMode, setIsEditMode] = useState(false);
+const createParticipantFormData = (participant) => ({
+  firstName: participant?.firstName || '',
+  lastName: participant?.lastName || '',
+  dateOfBirth: participant?.dateOfBirth || '',
+  role: participant?.role || 'Participant',
+  email: participant?.email || '',
+  phone: participant?.phone || '',
+  allergies: participant?.allergiesDetails || '',
+  medicalConditions: participant?.medicalConditionDetails || '',
+  medicare: participant?.medicare || '',
+  ecName: participant?.emergencyContactName || '',
+  ecLastName: participant?.emergencyContactSurname || '',
+  ecEmail: participant?.emergencyContactEmail || '',
+  ecPhone: participant?.emergencyContactPhone || '',
+  relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
+  personToGoHomeWith: participant?.personToGoHomeWith || '',
+  formReceived: participant?.formReceived || false,
+  mediaConsent: participant?.mediaConsentGiven || false,
+  futureContactConsent: participant?.futureContactPermissionGiven || false,
+  emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
+  selfSignOutConsent: participant?.selfSignOutPermission || false
+});
+
+const ParticipantDetailsModal = ({
+  participant,
+  onClose,
+  onUpdate,
+  onDelete,
+  initialEditMode = false,
+  initialDraft = null,
+  onDraftChange,
+  onClearDraft
+}) => {
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState({
-    firstName: participant?.firstName || '',
-    lastName: participant?.lastName || '',
-    dateOfBirth: participant?.dateOfBirth || '',
-    role: participant?.role || 'Participant',
-    email: participant?.email || '',
-    phone: participant?.phone || '',
-    allergies: participant?.allergiesDetails || '',
-    medicalConditions: participant?.medicalConditionDetails || '',
-    medicare: participant?.medicare || '',
-    ecName: participant?.emergencyContactName || '',
-    ecLastName: participant?.emergencyContactSurname || '',
-    ecEmail: participant?.emergencyContactEmail || '',
-    ecPhone: participant?.emergencyContactPhone || '',
-    relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
-    personToGoHomeWith: participant?.personToGoHomeWith || '',
-    mediaConsent: participant?.mediaConsentGiven || false,
-    futureContactConsent: participant?.futureContactPermissionGiven || false,
-    emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
-    selfSignOutConsent: participant?.selfSignOutPermission || false
-  });
+  const [formData, setFormData] = useState(() => initialDraft || createParticipantFormData(participant));
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -45,37 +57,34 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
     }
   };
 
+  const persistDraft = (nextFormData, nextEditMode = isEditMode) => {
+    if (!participant?.id || !nextEditMode || !onDraftChange) return;
+
+    onDraftChange({
+      participantId: participant?.id,
+      isEditMode: nextEditMode,
+      formData: nextFormData
+    });
+  };
+
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    setFormData(prev => {
+      const nextFormData = {
+        ...prev,
+        [field]: value
+      };
+      persistDraft(nextFormData);
+      return nextFormData;
+    });
   };
 
   const handleToggleEdit = () => {
     if (isEditMode) {
       // Cancel edit - reset form data
-      setFormData({
-        firstName: participant?.firstName || '',
-        lastName: participant?.lastName || '',
-        dateOfBirth: participant?.dateOfBirth || '',
-        role: participant?.role || 'Participant',
-        email: participant?.email || '',
-        phone: participant?.phone || '',
-        allergies: participant?.allergiesDetails || '',
-        medicalConditions: participant?.medicalConditionDetails || '',
-        medicare: participant?.medicare || '',
-        ecName: participant?.emergencyContactName || '',
-        ecLastName: participant?.emergencyContactSurname || '',
-        ecEmail: participant?.emergencyContactEmail || '',
-        ecPhone: participant?.emergencyContactPhone || '',
-        relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
-        personToGoHomeWith: participant?.personToGoHomeWith || '',
-        mediaConsent: participant?.mediaConsentGiven || false,
-        futureContactConsent: participant?.futureContactPermissionGiven || false,
-        emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
-        selfSignOutConsent: participant?.selfSignOutPermission || false
-      });
+      setFormData(createParticipantFormData(participant));
+      onClearDraft?.();
+    } else {
+      persistDraft(formData, true);
     }
     setIsEditMode(!isEditMode);
   };
@@ -94,6 +103,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
       }
       
       // Close the modal after successful save so it shows fresh data when reopened
+      onClearDraft?.();
       setIsEditMode(false);
       onClose();
     } catch (error) {
@@ -106,37 +116,26 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
 
   const handleCancel = () => {
     // Reset form data to original values
-    setFormData({
-      firstName: participant?.firstName || '',
-      lastName: participant?.lastName || '',
-      dateOfBirth: participant?.dateOfBirth || '',
-      role: participant?.role || 'Participant',
-      email: participant?.email || '',
-      phone: participant?.phone || '',
-      allergies: participant?.allergiesDetails || '',
-      medicalConditions: participant?.medicalConditionDetails || '',
-      medicare: participant?.medicare || '',
-      ecName: participant?.emergencyContactName || '',
-      ecLastName: participant?.emergencyContactSurname || '',
-      ecEmail: participant?.emergencyContactEmail || '',
-      ecPhone: participant?.emergencyContactPhone || '',
-      relationshipToMinor: participant?.emergencyContactRelationshipToMinor || '',
-      personToGoHomeWith: participant?.personToGoHomeWith || '',
-      mediaConsent: participant?.mediaConsentGiven || false,
-      futureContactConsent: participant?.futureContactPermissionGiven || false,
-      emergencyTreatmentConsent: participant?.emergencyTreatmentConsentGiven || false,
-      selfSignOutConsent: participant?.selfSignOutPermission || false
-    });
+    setFormData(createParticipantFormData(participant));
     setIsEditMode(false);
+    onClearDraft?.();
   };
 
   const handleConsentChange = async (consentField, value) => {
     try {
       // Update local state immediately for responsive UI
-      setFormData(prev => ({
-        ...prev,
-        [consentField]: value
-      }));
+      setFormData(prev => {
+        const nextFormData = {
+          ...prev,
+          [consentField]: value
+        };
+        persistDraft(nextFormData);
+        return nextFormData;
+      });
+
+      if (isEditMode) {
+        return;
+      }
 
       // Update database
       const updatedParticipant = await attendanceService?.updateParticipantConsent(
@@ -170,6 +169,7 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
       if (onDelete) {
         await onDelete(participant?.id);
       }
+      onClearDraft?.();
       setShowDeleteConfirm(false);
       onClose();
     } catch (error) {
@@ -393,6 +393,23 @@ const ParticipantDetailsModal = ({ participant, onClose, onUpdate, onDelete }) =
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-4">Consent Details</h3>
             <div className="space-y-3">
+              {/* Form Received */}
+              <div className="flex items-center space-x-3 p-3 bg-muted/30 border border-border rounded-lg">
+                <input
+                  type="checkbox"
+                  id="formReceived"
+                  checked={formData?.formReceived}
+                  onChange={(e) => handleConsentChange('formReceived', e?.target?.checked)}
+                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                />
+                <label
+                  htmlFor="formReceived"
+                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                >
+                  Form Received
+                </label>
+              </div>
+
               {/* Media Consent */}
               <div className="flex items-center space-x-3 p-3 bg-muted/30 border border-border rounded-lg">
                 <input

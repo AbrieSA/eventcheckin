@@ -22,6 +22,7 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
     relationshipToMinor: '',
     personToGoHomeWith: '',
     date: '',
+    formReceived: false,
     mediaConsent: false,
     futureContactConsent: false,
     emergencyTreatmentConsent: false,
@@ -141,6 +142,7 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
       relationshipToMinor: '',
       personToGoHomeWith: '',
       date: '',
+      formReceived: false,
       mediaConsent: false,
       futureContactConsent: false,
       emergencyTreatmentConsent: false,
@@ -489,6 +491,24 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
             <div>
               <h3 className="text-base font-semibold text-gray-900 mb-5">Consent Details</h3>
               <div className="space-y-3">
+                {/* Form Received */}
+                <div className="flex items-center space-x-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <input
+                    type="checkbox"
+                    id="formReceived"
+                    name="formReceived"
+                    checked={formData?.formReceived}
+                    onChange={(e) => handleChange({ target: { name: 'formReceived', value: e?.target?.checked } })}
+                    className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer" />
+
+                  <label
+                    htmlFor="formReceived"
+                    className="text-sm font-medium text-gray-900 cursor-pointer flex-1">
+
+                    Form Received
+                  </label>
+                </div>
+
                 {/* Media Consent */}
                 <div className="flex items-center space-x-3 p-3 bg-gray-50 border border-gray-200 rounded-lg">
                   <input

@@ -12,6 +12,23 @@ import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
 
 const TRANSITION_DELAY_MS = 1000;
+const WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
+
+const isFormMissing = (participant) => participant?.formReceived === false;
+
+const getMissingFormWeeks = (participant) => {
+  if (!participant?.createdAt) return 0;
+
+  const createdAt = new Date(participant?.createdAt)?.getTime();
+  if (Number.isNaN(createdAt)) return 0;
+
+  return Math.max(0, Math.floor((Date.now() - createdAt) / WEEK_IN_MS));
+};
+
+const getMissingFormLabel = (participant) => {
+  const weeks = getMissingFormWeeks(participant);
+  return `Form missing: ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
+};
 
 const EventCheckInInterface = () => {
   const navigate = useNavigate();
@@ -462,10 +479,13 @@ const EventCheckInInterface = () => {
     navigate('/');
   };
 
-  const getRowBackgroundColor = (participantId) => {
+  const getRowBackgroundColor = (participant) => {
     // Calculate green intensity based on time elapsed during pending transition
+    const participantId = participant?.id;
     const pendingStartTime = pendingTransitions?.[participantId];
-    if (!pendingStartTime) return 'transparent';
+    if (!pendingStartTime) {
+      return isFormMissing(participant) ? 'rgba(254, 226, 226, 0.65)' : 'transparent';
+    }
 
     const elapsed = Date.now() - pendingStartTime;
     const progress = Math.min(elapsed / TRANSITION_DELAY_MS, 1); // 0 to 1 over the transition delay
@@ -593,7 +613,7 @@ const EventCheckInInterface = () => {
               <tbody>
                 {filteredParticipants?.map((participant) => {
                   const isExpanded = expandedParticipants?.[participant?.id];
-                  const bgColor = getRowBackgroundColor(participant?.id);
+                  const bgColor = getRowBackgroundColor(participant);
                   
                   return (
                     <React.Fragment key={participant?.id}>
@@ -628,6 +648,11 @@ const EventCheckInInterface = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
+                            {isFormMissing(participant) &&
+                              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100" title={getMissingFormLabel(participant)}>
+                                <Icon name="FileWarning" size={16} className="text-red-600" />
+                              </div>
+                            }
                             {participant?.hasAllergies &&
                               <div className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100" title="Has Allergies">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -752,6 +777,12 @@ const EventCheckInInterface = () => {
                                   <span>Consent Information</span>
                                 </h4>
                                 <div className="space-y-2 text-sm">
+                                  {isFormMissing(participant) && (
+                                    <div className="flex items-center gap-2">
+                                      <Icon name="FileWarning" size={14} className="text-red-600" />
+                                      <span className="font-medium text-red-700">{getMissingFormLabel(participant)}</span>
+                                    </div>
+                                  )}
                                   <div className="flex items-center gap-2">
                                     <Icon 
                                       name={participant?.mediaConsentGiven ? "CheckCircle" : "XCircle"} 
@@ -873,6 +904,12 @@ const EventCheckInInterface = () => {
                                   <span>Consent Information</span>
                                 </h4>
                                 <div className="space-y-2 text-sm">
+                                  {isFormMissing(participant) && (
+                                    <div className="flex items-center gap-2">
+                                      <Icon name="FileWarning" size={14} className="text-red-600" />
+                                      <span className="font-medium text-red-700">{getMissingFormLabel(participant)}</span>
+                                    </div>
+                                  )}
                                   <div className="flex items-center gap-2">
                                     <Icon 
                                       name={participant?.mediaConsentGiven ? "CheckCircle" : "XCircle"} 
@@ -941,7 +978,7 @@ const EventCheckInInterface = () => {
                 const isPending = !!pendingTransitions?.[participant?.id];
                 const isCheckedOut = participantStages?.[participant?.id] === 'out' || isPending;
                 const isExpanded = expandedParticipants?.[participant?.id];
-                const bgColor = getRowBackgroundColor(participant?.id);
+                const bgColor = getRowBackgroundColor(participant);
 
                 return (
                   <React.Fragment key={participant?.id}>
@@ -973,6 +1010,11 @@ const EventCheckInInterface = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
+                          {isFormMissing(participant) &&
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-red-100" title={getMissingFormLabel(participant)}>
+                              <Icon name="FileWarning" size={16} className="text-red-600" />
+                            </div>
+                          }
                           {participant?.hasAllergies &&
                             <div className="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100" title="Has Allergies">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1108,6 +1150,12 @@ const EventCheckInInterface = () => {
                                 <span>Consent Information</span>
                               </h4>
                               <div className="space-y-2 text-sm">
+                                {isFormMissing(participant) && (
+                                  <div className="flex items-center gap-2">
+                                    <Icon name="FileWarning" size={14} className="text-red-600" />
+                                    <span className="font-medium text-red-700">{getMissingFormLabel(participant)}</span>
+                                  </div>
+                                )}
                                 <div className="flex items-center gap-2">
                                   <Icon 
                                     name={participant?.mediaConsentGiven ? "CheckCircle" : "XCircle"} 
@@ -1169,16 +1217,25 @@ const EventCheckInInterface = () => {
               <tbody>
                 {filteredParticipants?.map((participant) => {
                   const isExpanded = expandedParticipants?.[participant?.id];
+                  const bgColor = getRowBackgroundColor(participant);
                   
                   return (
                     <React.Fragment key={participant?.id}>
-                      <tr className="border-b border-slate-200">
+                      <tr
+                        className="border-b border-slate-200 transition-colors duration-100"
+                        style={{ backgroundColor: bgColor || 'transparent' }}
+                      >
                         <td className="px-6 py-4">
                           <button
                             onClick={() => toggleParticipantExpansion(participant?.id)}
                             className="flex w-full items-center gap-2 text-left text-sm text-slate-900 transition-colors hover:text-primary"
                           >
                             <span>{participant?.firstName} {participant?.lastName}</span>
+                            {isFormMissing(participant) &&
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-red-100" title={getMissingFormLabel(participant)}>
+                                <Icon name="FileWarning" size={15} className="text-red-600" />
+                              </span>
+                            }
                             <Icon 
                               name={isExpanded ? "ChevronUp" : "ChevronDown"} 
                               size={16} 
@@ -1284,6 +1341,12 @@ const EventCheckInInterface = () => {
                                   <span>Consent Information</span>
                                 </h4>
                                 <div className="space-y-2 text-sm">
+                                  {isFormMissing(participant) && (
+                                    <div className="flex items-center gap-2">
+                                      <Icon name="FileWarning" size={14} className="text-red-600" />
+                                      <span className="font-medium text-red-700">{getMissingFormLabel(participant)}</span>
+                                    </div>
+                                  )}
                                   <div className="flex items-center gap-2">
                                     <Icon 
                                       name={participant?.mediaConsentGiven ? "CheckCircle" : "XCircle"} 

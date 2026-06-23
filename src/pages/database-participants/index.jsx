@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
@@ -10,6 +10,17 @@ import ExportModal from './components/ExportModal';
 import AttendanceHistoryModal from './components/AttendanceHistoryModal';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
+
+const PARTICIPANT_EDIT_DRAFT_KEY = 'eventme_database_participant_edit_draft';
+
+const readParticipantEditDraft = () => {
+  try {
+    const rawDraft = sessionStorage?.getItem(PARTICIPANT_EDIT_DRAFT_KEY);
+    return rawDraft ? JSON.parse(rawDraft) : null;
+  } catch (error) {
+    return null;
+  }
+};
 
 const DatabaseParticipants = () => {
   const navigate = useNavigate();
@@ -24,8 +35,27 @@ const DatabaseParticipants = () => {
   const [attendanceCounts, setAttendanceCounts] = useState({});
   const [selectedAttendanceParticipant, setSelectedAttendanceParticipant] = useState(null);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
+  const [participantEditDraft, setParticipantEditDraft] = useState(() => readParticipantEditDraft());
   const [testEmailStatus, setTestEmailStatus] = useState(null); // null | 'sending' | 'sent' | 'failed'
   const [errorLogStatus, setErrorLogStatus] = useState(null); // null | 'downloading' | 'done' | 'failed'
+
+  const handleParticipantDraftChange = useCallback((draft) => {
+    try {
+      sessionStorage?.setItem(PARTICIPANT_EDIT_DRAFT_KEY, JSON.stringify(draft));
+      setParticipantEditDraft(draft);
+    } catch (error) {
+      console.error('Error saving participant edit draft:', error);
+    }
+  }, []);
+
+  const clearParticipantEditDraft = useCallback(() => {
+    try {
+      sessionStorage?.removeItem(PARTICIPANT_EDIT_DRAFT_KEY);
+    } catch (error) {
+      console.error('Error clearing participant edit draft:', error);
+    }
+    setParticipantEditDraft(null);
+  }, []);
 
   useEffect(() => {
     loadParticipants();
@@ -34,6 +64,17 @@ const DatabaseParticipants = () => {
   useEffect(() => {
     filterParticipants();
   }, [searchName, searchEvents, participants]);
+
+  useEffect(() => {
+    if (selectedParticipant || !participantEditDraft?.participantId || participants?.length === 0) return;
+
+    const draftParticipant = participants?.find((participant) => participant?.id === participantEditDraft?.participantId);
+    if (draftParticipant) {
+      setSelectedParticipant(draftParticipant);
+    } else {
+      clearParticipantEditDraft();
+    }
+  }, [participants, participantEditDraft, selectedParticipant, clearParticipantEditDraft]);
 
   const loadParticipants = async () => {
     try {
@@ -102,10 +143,12 @@ const DatabaseParticipants = () => {
   };
 
   const handleParticipantClick = (participant) => {
+    clearParticipantEditDraft();
     setSelectedParticipant(participant);
   };
 
   const handleCloseModal = () => {
+    clearParticipantEditDraft();
     setSelectedParticipant(null);
   };
 
@@ -117,6 +160,7 @@ const DatabaseParticipants = () => {
     setFilteredParticipants((prev) =>
     prev?.map((p) => p?.id === updatedParticipant?.id ? updatedParticipant : p)
     );
+    setSelectedParticipant((prev) => prev?.id === updatedParticipant?.id ? updatedParticipant : prev);
   };
 
   const handleDeleteParticipant = async (participantId) => {
@@ -351,10 +395,15 @@ const DatabaseParticipants = () => {
       {/* Participant Details Modal */}
       {selectedParticipant &&
       <ParticipantDetailsModal
+        key={selectedParticipant?.id}
         participant={selectedParticipant}
         onClose={handleCloseModal}
         onUpdate={handleUpdateParticipant}
-        onDelete={handleDeleteParticipant} />
+        onDelete={handleDeleteParticipant}
+        initialEditMode={participantEditDraft?.participantId === selectedParticipant?.id ? participantEditDraft?.isEditMode : false}
+        initialDraft={participantEditDraft?.participantId === selectedParticipant?.id ? participantEditDraft?.formData : null}
+        onDraftChange={handleParticipantDraftChange}
+        onClearDraft={clearParticipantEditDraft} />
 
       }
       {/* Attendance History Modal */}
