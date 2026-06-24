@@ -25,16 +25,18 @@ export const reportError = async ({ errorType = 'Frontend Error', message, stack
     const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL;
     if (!supabaseUrl) return;
 
-    // Get current user if available
+    // Error reports are authenticated-only; skip reporting when no session exists.
+    let session = null;
     let currentUserId = userId;
-    if (!currentUserId) {
-      try {
-        const { data: { session } } = await supabase?.auth?.getSession();
-        currentUserId = session?.user?.id;
-      } catch (_) {
-        // ignore auth errors during error reporting
-      }
+    try {
+      const { data } = await supabase?.auth?.getSession();
+      session = data?.session;
+      currentUserId = currentUserId || session?.user?.id;
+    } catch (_) {
+      return;
     }
+
+    if (!session?.access_token) return;
 
     const payload = {
       errorType,
@@ -46,14 +48,9 @@ export const reportError = async ({ errorType = 'Frontend Error', message, stack
       userId: currentUserId || null,
     };
 
-    // Fire and forget — don't await to avoid blocking UI
-    fetch(`${supabaseUrl}/functions/v1/send-error-report`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${import.meta.env?.VITE_SUPABASE_ANON_KEY}`,
-      },
-      body: JSON.stringify(payload),
+    // Fire and forget - don't await to avoid blocking UI
+    supabase?.functions?.invoke('send-error-report', {
+      body: payload,
     })?.catch(() => {
       // Silently fail — error reporting must never cause more errors
     });

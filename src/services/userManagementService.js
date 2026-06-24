@@ -52,40 +52,20 @@ export const userManagementService = {
 
   // Create new user (Super Admin only)
   async createUser(userData) {
-    try {
-      // Create auth user
-      const { data: authData, error: authError } = await supabase?.auth?.signUp({
+    const { data, error } = await supabase?.functions?.invoke('create-user', {
+      body: {
         email: userData?.email,
         password: userData?.password,
-        options: {
-          data: {
-            full_name: userData?.fullName,
-            role: userData?.userRole || 'regular_user'
-          }
-        }
-      });
+        fullName: userData?.fullName,
+        userRole: userData?.userRole || 'regular_user'
+      },
+    });
 
-      if (authError) throw authError;
-
-      // Return the created user profile (trigger creates it automatically)
-      if (authData?.user) {
-        // Wait a moment for trigger to complete
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        const { data: profileData, error: profileError } = await supabase
-          ?.from('user_profiles')
-          ?.select('*')
-          ?.eq('id', authData?.user?.id)
-          ?.maybeSingle();
-
-        if (profileError) throw profileError;
-        return toCamelCase(profileData);
-      }
-
-      return null;
-    } catch (error) {
-      throw error;
+    if (error || !data?.success) {
+      throw new Error(data?.error || error?.message || 'Failed to create user');
     }
+
+    return toCamelCase(data?.user);
   },
 
   // Update user profile (Super Admin only)
@@ -105,29 +85,12 @@ export const userManagementService = {
 
   // Delete user (Super Admin only)
   async deleteUser(userId) {
-    // Get current session (don't refresh, use existing valid session)
-    const { data: { session }, error: sessionError } = await supabase?.auth?.getSession();
-    
-    if (sessionError || !session?.access_token) {
-      throw new Error('No valid session found. Please log in again.');
-    }
+    const { data, error } = await supabase?.functions?.invoke('delete-user', {
+      body: { userId },
+    });
 
-    const response = await fetch(
-      `${import.meta.env?.VITE_SUPABASE_URL}/functions/v1/delete-user`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId }),
-      }
-    );
-
-    const result = await response?.json();
-
-    if (!result?.success) {
-      throw new Error(result?.error || 'Failed to delete user');
+    if (error || !data?.success) {
+      throw new Error(data?.error || error?.message || 'Failed to delete user');
     }
 
     return { success: true };
@@ -154,36 +117,12 @@ export const userManagementService = {
 
   // Toggle user status (Super Admin only)
   async toggleUserStatus(userId, isActive) {
-    // Validate and get fresh user token (this will refresh if needed)
-    const { data: { user }, error: userError } = await supabase?.auth?.getUser();
-    
-    if (userError || !user) {
-      throw new Error('Authentication required. Please log in again.');
-    }
+    const { data, error } = await supabase?.functions?.invoke('toggle-user-status', {
+      body: { userId, isActive },
+    });
 
-    // Get the current session with validated token
-    const { data: { session }, error: sessionError } = await supabase?.auth?.getSession();
-    
-    if (sessionError || !session?.access_token) {
-      throw new Error('No valid session found. Please log in again.');
-    }
-
-    const response = await fetch(
-      `${import.meta.env?.VITE_SUPABASE_URL}/functions/v1/toggle-user-status`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session?.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, isActive }),
-      }
-    );
-
-    const result = await response?.json();
-
-    if (!result?.success) {
-      throw new Error(result?.error || 'Failed to update user status');
+    if (error || !data?.success) {
+      throw new Error(data?.error || error?.message || 'Failed to update user status');
     }
 
     return { success: true };

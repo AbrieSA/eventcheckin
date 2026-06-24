@@ -381,22 +381,7 @@ export const attendanceService = {
   // Log event with attendance records
   async logEvent(eventId, eventData, participantStages, participantLabels = {}) {
     try {
-      // Update event to mark as inactive and save notes
-      const snakeData = toSnakeCase(eventData);
-      const { data: updatedEvent, error: eventError } = await supabase
-        ?.from('events')
-        ?.update({
-          ...snakeData,
-          is_active: false,
-          updated_at: new Date()?.toISOString()
-        })
-        ?.eq('id', eventId)
-        ?.select()
-        ?.single();
-
-      if (eventError) throw eventError;
-
-      // Create attendance records for all participants with 'in' or 'out' status
+      // Save final attendance before archiving so active-event RLS policies allow the write.
       const attendanceRecords = [];
       
       for (const [participantId, stage] of Object.entries(participantStages)) {
@@ -435,6 +420,22 @@ export const attendanceService = {
           }
         }
       }
+
+      // Update event to mark as inactive and save notes
+      const snakeData = toSnakeCase(eventData);
+      const { data: updatedEvent, error: eventError } = await supabase
+        ?.from('events')
+        ?.update({
+          ...snakeData,
+          is_active: false,
+          updated_at: new Date()?.toISOString()
+        })
+        ?.eq('id', eventId)
+        ?.eq('is_active', true)
+        ?.select()
+        ?.single();
+
+      if (eventError) throw eventError;
 
       return toCamelCase(updatedEvent);
     } catch (error) {

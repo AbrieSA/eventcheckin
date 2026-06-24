@@ -5,106 +5,118 @@ declare const Deno: any;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req?.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const jsonResponse = (body: Record<string, unknown>, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+
+const createAdminClient = () =>
+  createClient(
+    Deno?.env?.get('SUPABASE_URL') ?? '',
+    Deno?.env?.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    },
+  );
+
+serve(async (req: Request) => {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
   }
 
+  if (req.method !== 'POST') {
+    return jsonResponse({ success: false, error: 'Method not allowed' }, 405);
+  }
+
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return jsonResponse({ success: false, error: 'Authentication required' }, 401);
+  }
+
+  const supabaseAdmin = createAdminClient();
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+  if (userError || !user) {
+    return jsonResponse({ success: false, error: 'Invalid user token' }, 401);
+  }
+
+  const { data: actorProfile, error: actorError } = await supabaseAdmin
+    .from('user_profiles')
+    .select('user_role, is_active')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (actorError || !actorProfile || actorProfile.user_role !== 'super_admin' || actorProfile.is_active !== true) {
+    return jsonResponse({ success: false, error: 'Only active super admins can change user status' }, 403);
+  }
+
+  let body: { userId?: unknown; isActive?: unknown };
   try {
-    // Get the authorization header
-    const authHeader = req?.headers?.get('Authorization')
-    if (!authHeader) {
-      throw new Error('Missing authorization header')
-    }
-
-    // Extract the token from "Bearer <token>"
-    const token = authHeader?.replace('Bearer ', '')
-
-    // Create Supabase client with service role key (has admin privileges)
-    const supabaseAdmin = createClient(
-      Deno?.env?.get('SUPABASE_URL') ?? '',
-      Deno?.env?.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false
-        }
-      }
-    )
-
-    // Verify the JWT token using admin client
-    const { data: { user }, error: userError } = await supabaseAdmin?.auth?.getUser(token)
-    if (userError || !user) {
-      throw new Error('Unauthorized: Invalid user token')
-    }
-
-    // Check if user is super admin
-    const { data: profile, error: profileError } = await supabaseAdmin?.from('user_profiles')?.select('user_role')?.eq('id', user?.id)?.single()
-
-    if (profileError || !profile || profile?.user_role !== 'super_admin') {
-      throw new Error('Unauthorized: Only super admins can change user status')
-    }
-
-    // Get the user ID and new status from request body
-    const { userId, isActive } = await req?.json()
-    if (!userId || typeof isActive !== 'boolean') {
-      throw new Error('Missing userId or isActive in request body')
-    }
-
-    // Prevent self-deactivation
-    if (userId === user?.id) {
-      throw new Error('Cannot change your own account status')
-    }
-
-    // Update user_profiles table
-    const { error: profileUpdateError } = await supabaseAdmin?.from('user_profiles')?.update({ is_active: isActive })?.eq('id', userId)
-
-    if (profileUpdateError) {
-      throw new Error(`Failed to update user profile: ${profileUpdateError.message}`)
-    }
-
-    // Update auth.users using admin API to ban/unban user
-    if (isActive) {
-      // Reactivate user by removing ban
-      const { error: authUpdateError } = await supabaseAdmin?.auth?.admin?.updateUserById(
-        userId,
-        { ban_duration: 'none' }
-      )
-      if (authUpdateError) {
-        throw new Error(`Failed to reactivate auth user: ${authUpdateError.message}`)
-      }
-    } else {
-      // Deactivate user by setting indefinite ban
-      const { error: authUpdateError } = await supabaseAdmin?.auth?.admin?.updateUserById(
-        userId,
-        { ban_duration: '876000h' } // 100 years (effectively permanent)
-      )
-      if (authUpdateError) {
-        throw new Error(`Failed to deactivate auth user: ${authUpdateError.message}`)
-      }
-    }
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: isActive ? 'User reactivated successfully' : 'User deactivated successfully'
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      },
-    )
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ success: false, error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      },
-    )
+    body = await req.json();
+  } catch (_) {
+    return jsonResponse({ success: false, error: 'Invalid JSON body' }, 400);
   }
-})
+
+  const userId = typeof body.userId === 'string' ? body.userId : '';
+  const isActive = body.isActive;
+  if (!UUID_PATTERN.test(userId) || typeof isActive !== 'boolean') {
+    return jsonResponse({ success: false, error: 'Invalid userId or isActive' }, 400);
+  }
+
+  if (userId === user.id) {
+    return jsonResponse({ success: false, error: 'Cannot change your own account status' }, 400);
+  }
+
+  const { data: targetProfile, error: targetError } = await supabaseAdmin
+    .from('user_profiles')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (targetError) {
+    return jsonResponse({ success: false, error: 'Failed to verify target user' }, 500);
+  }
+
+  if (!targetProfile) {
+    return jsonResponse({ success: false, error: 'User not found' }, 404);
+  }
+
+  const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(
+    userId,
+    { ban_duration: isActive ? 'none' : '876000h' },
+  );
+
+  if (authUpdateError) {
+    console.error('Auth status update failed', authUpdateError);
+    return jsonResponse({ success: false, error: 'Failed to update auth user status' }, 500);
+  }
+
+  const { error: profileUpdateError } = await supabaseAdmin
+    .from('user_profiles')
+    .update({ is_active: isActive })
+    .eq('id', userId);
+
+  if (profileUpdateError) {
+    console.error('Profile status update failed after auth status update', profileUpdateError);
+    await supabaseAdmin.auth.admin.updateUserById(
+      userId,
+      { ban_duration: isActive ? '876000h' : 'none' },
+    ).catch(() => {});
+    return jsonResponse({ success: false, error: 'Failed to update user status' }, 500);
+  }
+
+  return jsonResponse({
+    success: true,
+    message: isActive ? 'User reactivated successfully' : 'User deactivated successfully',
+  });
+});

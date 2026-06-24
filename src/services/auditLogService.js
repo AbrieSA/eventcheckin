@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { buildCsv } from '../utils/csv';
 
 // Helper function to convert snake_case to camelCase
 const toCamelCase = (obj) => {
@@ -85,10 +86,7 @@ export const auditLogService = {
       });
 
       // Build CSV content
-      const csvContent = [
-        headers?.join(','),
-        ...rows?.map(row => row?.map(cell => `"${cell}"`)?.join(','))
-      ]?.join('\n');
+      const csvContent = buildCsv(headers, rows);
 
       // Create blob and download
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

@@ -47,20 +47,6 @@ const AuthenticationLogin = () => {
     }
   };
 
-  const fillDemoCredentials = (role) => {
-    if (role === 'super_admin') {
-      setEmail('superadmin@eventcheckin.com');
-      setPassword('admin123');
-    } else if (role === 'admin') {
-      setEmail('admin@eventcheckin.com');
-      setPassword('admin123');
-    } else if (role === 'regular_user') {
-      setEmail('user@eventcheckin.com');
-      setPassword('user123');
-    }
-    setError('');
-  };
-
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">

@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '../../../components/ui/Button';
+import { buildCsv } from '../../../utils/csv';
 
 const LABEL_STYLES = {
   leader: 'bg-purple-100 text-purple-700',
@@ -30,10 +31,7 @@ const EventDetailsModal = ({ event, onClose }) => {
       record?.checkedOutAt ? 'Yes' : 'No'
     ]);
 
-    const csvContent = [
-      headers?.join(','),
-      ...rows?.map(row => row?.join(','))
-    ]?.join('\n');
+    const csvContent = buildCsv(headers, rows);
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL?.createObjectURL(blob);

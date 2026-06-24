@@ -10,6 +10,7 @@ import ExportModal from './components/ExportModal';
 import AttendanceHistoryModal from './components/AttendanceHistoryModal';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
+import { buildCsv } from '../../utils/csv';
 
 const PARTICIPANT_EDIT_DRAFT_KEY = 'eventme_database_participant_edit_draft';
 
@@ -218,13 +219,13 @@ const DatabaseParticipants = () => {
         row?.record_id || '',
         row?.record_name || '',
         row?.action_type || '',
-        (row?.change_description || '')?.replace(/"/g, '""'),
-        (row?.changed_fields || '')?.replace(/"/g, '""'),
+        row?.change_description || '',
+        row?.changed_fields || '',
         row?.changed_by || '',
         row?.changed_at ? new Date(row.changed_at)?.toLocaleString() : '',
-      ]?.map(v => `"${v}"`)?.join(','));
+      ]);
 
-      const csvContent = [headers?.join(','), ...csvRows]?.join('\n');
+      const csvContent = buildCsv(headers, csvRows);
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');

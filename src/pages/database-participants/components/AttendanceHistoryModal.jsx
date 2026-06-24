@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Icon from '../../../components/AppIcon';
 import Button from '../../../components/ui/Button';
 import { attendanceService } from '../../../services/attendanceService';
+import { buildCsv } from '../../../utils/csv';
 
 const AttendanceHistoryModal = ({ participant, onClose }) => {
   const [attendance, setAttendance] = useState([]);
@@ -51,10 +52,7 @@ const AttendanceHistoryModal = ({ participant, onClose }) => {
     ]);
 
     // Create CSV content
-    const csvContent = [
-      headers?.join(','),
-      ...rows?.map(row => row?.map(cell => `"${cell}"`)?.join(','))
-    ]?.join('\n');
+    const csvContent = buildCsv(headers, rows);
 
     // Create and download file
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });

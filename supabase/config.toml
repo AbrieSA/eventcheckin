@@ -1,0 +1,11 @@
+[functions.delete-user]
+verify_jwt = true
+
+[functions.toggle-user-status]
+verify_jwt = true
+
+[functions.send-error-report]
+verify_jwt = true
+
+[functions.create-user]
+verify_jwt = true

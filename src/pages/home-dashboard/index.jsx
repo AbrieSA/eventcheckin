@@ -38,6 +38,7 @@ const HomeDashboard = () => {
   };
 
   const handleCreateEvent = () => {
+    if (!isAdmin()) return;
     setIsModalOpen(true);
   };
 
@@ -65,6 +66,7 @@ const HomeDashboard = () => {
   };
 
   const handleCancelEvent = async () => {
+    if (!isAdmin()) return;
     if (!activeEvent) return;
 
     const confirmed = window.confirm(
@@ -184,26 +186,28 @@ const HomeDashboard = () => {
                 </div>
               </button>
 
-              {/* Cancel Event Button */}
-              <button
-                onClick={handleCancelEvent}
-                className="w-full bg-red-50 hover:bg-red-100 border-2 border-red-300 hover:border-red-500 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl p-8 group focus:outline-none focus:ring-4 focus:ring-red-300 active:scale-[0.98]"
-              >
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="flex items-center justify-center w-16 h-16 bg-red-100 group-hover:bg-red-200 rounded-full transition-colors">
-                    <Icon 
-                      name="X" 
-                      size={32} 
-                      color="#ef4444"
-                    />
+              {/* Cancel Event Button - Admin and Super Admin Only */}
+              {showAdminButtons && (
+                <button
+                  onClick={handleCancelEvent}
+                  className="w-full bg-red-50 hover:bg-red-100 border-2 border-red-300 hover:border-red-500 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl p-8 group focus:outline-none focus:ring-4 focus:ring-red-300 active:scale-[0.98]"
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <div className="flex items-center justify-center w-16 h-16 bg-red-100 group-hover:bg-red-200 rounded-full transition-colors">
+                      <Icon
+                        name="X"
+                        size={32}
+                        color="#ef4444"
+                      />
+                    </div>
+                    <span className="text-xl font-semibold text-red-600 group-hover:text-red-700 transition-colors">
+                      Cancel Event
+                    </span>
                   </div>
-                  <span className="text-xl font-semibold text-red-600 group-hover:text-red-700 transition-colors">
-                    Cancel Event
-                  </span>
-                </div>
-              </button>
+                </button>
+              )}
             </>
-          ) : (
+          ) : showAdminButtons ? (
             // Create New Event Button
             <button
               onClick={handleCreateEvent}
@@ -222,6 +226,21 @@ const HomeDashboard = () => {
                 </span>
               </div>
             </button>
+          ) : (
+            <div className="w-full bg-card border-2 border-border shadow-lg rounded-2xl p-8">
+              <div className="flex flex-col items-center space-y-4">
+                <div className="flex items-center justify-center w-16 h-16 bg-muted rounded-full">
+                  <Icon
+                    name="CalendarOff"
+                    size={32}
+                    color="var(--color-muted-foreground)"
+                  />
+                </div>
+                <span className="text-xl font-semibold text-foreground">
+                  No Active Event
+                </span>
+              </div>
+            </div>
           )}
 
           {/* Database Button - Admin and Super Admin Only */}

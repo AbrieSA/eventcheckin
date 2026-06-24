@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../../../components/ui/Button';
 import { Checkbox } from '../../../components/ui/Checkbox';
+import { buildCsv } from '../../../utils/csv';
 
 const ExportModal = ({ participants, onClose }) => {
   // Define all available columns from participants table
@@ -65,10 +66,8 @@ const ExportModal = ({ participants, onClose }) => {
       const headers = columnsToExport?.map(col => col?.label);
 
       // Create CSV rows
-      const csvRows = [
-        headers?.join(','),
-        ...participants?.map(participant => {
-          return columnsToExport?.map(col => {
+      const rows = participants?.map(participant => {
+        return columnsToExport?.map(col => {
             let value = participant?.[col?.key];
 
             // Handle different data types
@@ -77,21 +76,17 @@ const ExportModal = ({ participants, onClose }) => {
             } else if (typeof value === 'boolean') {
               return value ? 'Yes' : 'No';
             } else if (Array.isArray(value)) {
-              return `"${value?.join('; ')}"`;
-            } else if (typeof value === 'string' && (value?.includes(',') || value?.includes('"') || value?.includes('\n'))) {
-              // Escape quotes and wrap in quotes if contains special characters
-              return `"${value?.replace(/"/g, '""')}"`;
+              return value?.join('; ');
             } else if (value instanceof Date || col?.key === 'dateOfBirth' || col?.key === 'createdAt') {
               // Format dates
               return new Date(value)?.toLocaleDateString();
             } else {
               return value;
             }
-          })?.join(',');
-        })
-      ];
+          });
+        }) || [];
 
-      const csvContent = csvRows?.join('\n');
+      const csvContent = buildCsv(headers, rows);
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = window.URL?.createObjectURL(blob);
       const a = document.createElement('a');

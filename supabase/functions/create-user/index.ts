@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const VALID_ROLES = new Set(['regular_user', 'admin', 'super_admin']);
 
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -28,6 +28,9 @@ const createAdminClient = () =>
       },
     },
   );
+
+const isEmail = (value: unknown): value is string =>
+  typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
@@ -57,54 +60,57 @@ serve(async (req: Request) => {
     .maybeSingle();
 
   if (actorError || !actorProfile || actorProfile.user_role !== 'super_admin' || actorProfile.is_active !== true) {
-    return jsonResponse({ success: false, error: 'Only active super admins can delete users' }, 403);
+    return jsonResponse({ success: false, error: 'Only active super admins can create users' }, 403);
   }
 
-  let body: { userId?: unknown };
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch (_) {
     return jsonResponse({ success: false, error: 'Invalid JSON body' }, 400);
   }
 
-  const userId = typeof body.userId === 'string' ? body.userId : '';
-  if (!UUID_PATTERN.test(userId)) {
-    return jsonResponse({ success: false, error: 'Invalid userId' }, 400);
+  const email = body.email;
+  const password = body.password;
+  const fullName = typeof body.fullName === 'string' ? body.fullName.trim().slice(0, 120) : '';
+  const userRole = typeof body.userRole === 'string' && VALID_ROLES.has(body.userRole)
+    ? body.userRole
+    : 'regular_user';
+
+  if (!isEmail(email) || typeof password !== 'string' || password.length < 8 || !fullName) {
+    return jsonResponse({ success: false, error: 'Invalid user details' }, 400);
   }
 
-  if (userId === user.id) {
-    return jsonResponse({ success: false, error: 'Cannot delete your own account' }, 400);
+  const { data: created, error: createError } = await supabaseAdmin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name: fullName },
+  });
+
+  if (createError || !created?.user) {
+    console.error('Auth user creation failed', createError);
+    return jsonResponse({ success: false, error: 'Failed to create user' }, 500);
   }
 
-  const { data: targetProfile, error: targetError } = await supabaseAdmin
+  const { data: profile, error: profileError } = await supabaseAdmin
     .from('user_profiles')
-    .select('id')
-    .eq('id', userId)
+    .upsert({
+      id: created.user.id,
+      email,
+      full_name: fullName,
+      user_role: userRole,
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: 'id' })
+    .select()
     .maybeSingle();
 
-  if (targetError) {
-    return jsonResponse({ success: false, error: 'Failed to verify target user' }, 500);
+  if (profileError || !profile) {
+    console.error('Profile creation failed after auth user creation', profileError);
+    await supabaseAdmin.auth.admin.deleteUser(created.user.id).catch(() => {});
+    return jsonResponse({ success: false, error: 'Failed to create user profile' }, 500);
   }
 
-  if (!targetProfile) {
-    return jsonResponse({ success: false, error: 'User not found' }, 404);
-  }
-
-  const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
-  if (authDeleteError) {
-    console.error('Auth user deletion failed', authDeleteError);
-    return jsonResponse({ success: false, error: 'Failed to delete user' }, 500);
-  }
-
-  const { error: profileDeleteError } = await supabaseAdmin
-    .from('user_profiles')
-    .delete()
-    .eq('id', userId);
-
-  if (profileDeleteError) {
-    console.error('Profile deletion failed after auth deletion', profileDeleteError);
-    return jsonResponse({ success: false, error: 'User auth record was deleted, but profile cleanup failed' }, 500);
-  }
-
-  return jsonResponse({ success: true, message: 'User deleted successfully' });
+  return jsonResponse({ success: true, user: profile });
 });
