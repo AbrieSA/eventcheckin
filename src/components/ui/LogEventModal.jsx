@@ -11,6 +11,14 @@ const ROLE_OPTIONS = [
   { value: 'volunteer', label: 'Volunteer' },
 ];
 
+const getParticipantLabel = (role) => {
+  const normalizedRole = String(role || '').trim().toLowerCase();
+
+  return ROLE_OPTIONS.some(({ value }) => value === normalizedRole)
+    ? normalizedRole
+    : 'participant';
+};
+
 const formatDateForInput = (value) => {
   if (!value) return '';
 
@@ -50,9 +58,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
 
   const getDefaultParticipantLabels = () =>
     (participants || [])?.reduce((labels, participant) => {
-      if (participant?.is18OrOver) {
-        labels[participant.id] = 'volunteer';
-      }
+      labels[participant.id] = getParticipantLabel(participant?.role);
       return labels;
     }, {});
 
