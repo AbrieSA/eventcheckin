@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { reportAuthError } from '../services/errorReportingService';
+import { attendanceService } from '../services/attendanceService';
 
 const AuthContext = createContext({})
 
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [userProfile, setUserProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [profileLoading, setProfileLoading] = useState(false)
+  const authenticatedUserIdRef = useRef(null)
 
   // Isolated async operations - never called from auth callbacks
   const profileOperations = {
@@ -55,12 +57,24 @@ export const AuthProvider = ({ children }) => {
   const authStateHandlers = {
     // This handler MUST remain synchronous - Supabase requirement
     onChange: (event, session) => {
+      const nextUserId = session?.user?.id ?? null
+
+      if (
+        authenticatedUserIdRef?.current &&
+        nextUserId &&
+        authenticatedUserIdRef?.current !== nextUserId
+      ) {
+        attendanceService?.invalidateParticipantDatabaseCache()
+      }
+      authenticatedUserIdRef.current = nextUserId
+
       setUser(session?.user ?? null)
       setLoading(false)
       
       if (session?.user) {
         profileOperations?.load(session?.user?.id) // Fire-and-forget
       } else {
+        attendanceService?.invalidateParticipantDatabaseCache()
         profileOperations?.clear()
       }
     }
@@ -77,6 +91,7 @@ export const AuthProvider = ({ children }) => {
         console.warn('Invalid session detected, clearing auth state')
         supabase?.auth?.signOut()?.catch(() => {})
         setUser(null)
+        attendanceService?.invalidateParticipantDatabaseCache()
         profileOperations?.clear()
         setLoading(false)
       }
@@ -90,6 +105,7 @@ export const AuthProvider = ({ children }) => {
           console.warn('Token refresh failed, clearing session')
           supabase?.auth?.signOut()?.catch(() => {})
           setUser(null)
+          attendanceService?.invalidateParticipantDatabaseCache()
           profileOperations?.clear()
           setLoading(false)
           return
@@ -152,6 +168,7 @@ export const AuthProvider = ({ children }) => {
       const { error } = await supabase?.auth?.signOut()
       if (!error) {
         setUser(null)
+        attendanceService?.invalidateParticipantDatabaseCache()
         profileOperations?.clear()
       }
       return { error }

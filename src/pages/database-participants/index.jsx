@@ -24,16 +24,20 @@ const readParticipantEditDraft = () => {
 };
 
 const DatabaseParticipants = () => {
+  const initialDatabaseCache = attendanceService?.getParticipantDatabaseCache();
   const navigate = useNavigate();
-  const [participants, setParticipants] = useState([]);
-  const [filteredParticipants, setFilteredParticipants] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [participants, setParticipants] = useState(() => initialDatabaseCache?.participants || []);
+  const [filteredParticipants, setFilteredParticipants] = useState(() => initialDatabaseCache?.participants || []);
+  const [loading, setLoading] = useState(() => !initialDatabaseCache);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [hasSnapshot, setHasSnapshot] = useState(() => !!initialDatabaseCache);
   const [searchName, setSearchName] = useState('');
   const [searchEvents, setSearchEvents] = useState('');
   const [showOptions, setShowOptions] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [attendanceCounts, setAttendanceCounts] = useState({});
+  const [attendanceCounts, setAttendanceCounts] = useState(() => initialDatabaseCache?.attendanceCounts || {});
   const [selectedAttendanceParticipant, setSelectedAttendanceParticipant] = useState(null);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
   const [participantEditDraft, setParticipantEditDraft] = useState(() => readParticipantEditDraft());
@@ -59,7 +63,7 @@ const DatabaseParticipants = () => {
   }, []);
 
   useEffect(() => {
-    loadParticipants();
+    loadParticipants({ background: !!initialDatabaseCache });
   }, []);
 
   useEffect(() => {
@@ -77,33 +81,30 @@ const DatabaseParticipants = () => {
     }
   }, [participants, participantEditDraft, selectedParticipant, clearParticipantEditDraft]);
 
-  const loadParticipants = async () => {
-    try {
+  const loadParticipants = async ({ background = hasSnapshot } = {}) => {
+    if (background) {
+      setRefreshing(true);
+    } else {
       setLoading(true);
-      const data = await attendanceService?.getAllParticipants();
-      setParticipants(data || []);
-      setFilteredParticipants(data || []);
-      
-      // Load attendance counts for all participants
-      await loadAttendanceCounts(data || []);
+    }
+    setLoadError(null);
+
+    try {
+      const snapshot = await attendanceService?.refreshParticipantDatabaseCache();
+      const nextParticipants = snapshot?.participants || [];
+
+      setParticipants(nextParticipants);
+      setFilteredParticipants(nextParticipants);
+      setAttendanceCounts(snapshot?.attendanceCounts || {});
+      setHasSnapshot(true);
+      return true;
     } catch (error) {
       console.error('Error loading participants:', error);
-      alert('Failed to load participants. Please try again.');
+      setLoadError(error);
+      return false;
     } finally {
       setLoading(false);
-    }
-  };
-
-  const loadAttendanceCounts = async (participantsList) => {
-    try {
-      const counts = {};
-      for (const participant of participantsList) {
-        const attendance = await attendanceService?.getParticipantAttendance(participant?.id);
-        counts[participant?.id] = attendance?.length || 0;
-      }
-      setAttendanceCounts(counts);
-    } catch (error) {
-      console.error('Error loading attendance counts:', error);
+      setRefreshing(false);
     }
   };
 
@@ -139,7 +140,7 @@ const DatabaseParticipants = () => {
 
   const handleParticipantAdded = async (newParticipant) => {
     // Reload participants to include the new one
-    await loadParticipants();
+    await loadParticipants({ background: true });
     setShowAddParticipantModal(false);
   };
 
@@ -162,6 +163,7 @@ const DatabaseParticipants = () => {
     prev?.map((p) => p?.id === updatedParticipant?.id ? updatedParticipant : p)
     );
     setSelectedParticipant((prev) => prev?.id === updatedParticipant?.id ? updatedParticipant : prev);
+    loadParticipants({ background: true });
   };
 
   const handleDeleteParticipant = async (participantId) => {
@@ -169,6 +171,7 @@ const DatabaseParticipants = () => {
       await attendanceService?.deleteParticipant(participantId);
       setParticipants((prev) => prev?.filter((p) => p?.id !== participantId));
       setFilteredParticipants((prev) => prev?.filter((p) => p?.id !== participantId));
+      await loadParticipants({ background: true });
     } catch (error) {
       console.error('Error deleting participant:', error);
       alert(`Failed to delete participant: ${error?.message || 'Unknown error'}`);
@@ -317,11 +320,45 @@ const DatabaseParticipants = () => {
           </div>
         </div>
 
+        {loadError &&
+        <div
+          role="alert"
+          className="mb-4 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-900 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <Icon name="AlertCircle" size={20} className="mt-0.5 shrink-0" />
+              <p className="text-sm">
+                {hasSnapshot ?
+                'Could not refresh the database. Showing the latest data saved in this app session.' :
+                'Failed to load participants. Check your connection and try again.'}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => loadParticipants({ background: hasSnapshot })}
+              className="shrink-0">
+              Retry
+            </Button>
+          </div>
+        }
+
+        {refreshing &&
+        <div role="status" className="mb-3 flex items-center justify-end gap-2 text-sm text-muted-foreground">
+            <Icon name="Loader2" size={16} className="animate-spin" />
+            <span>Refreshing database...</span>
+          </div>
+        }
+
         {/* Participants Table */}
         <div className="overflow-hidden rounded-[28px] border border-border/80 bg-card/95 shadow-sm">
           {loading ?
           <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div> :
+          loadError && !hasSnapshot ?
+          <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+              <Icon name="WifiOff" size={48} className="mb-4 text-muted-foreground" />
+              <p className="mb-2 text-lg font-medium text-foreground">Participant data is unavailable</p>
+              <p className="text-sm text-muted-foreground">Use Retry above to load the database again.</p>
             </div> :
           filteredParticipants?.length === 0 ?
           <div className="flex flex-col items-center justify-center py-12 px-4">

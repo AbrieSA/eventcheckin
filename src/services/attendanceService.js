@@ -39,7 +39,151 @@ const toSnakeCase = (obj) => {
   }, {});
 };
 
+const DATABASE_PAGE_SIZE = 1000;
+
+let participantDatabaseCache = null;
+let participantDatabaseRefresh = null;
+let participantDatabaseCacheVersion = 0;
+
+const getParticipantDatabaseCache = () => participantDatabaseCache;
+
+const invalidateParticipantDatabaseCache = () => {
+  participantDatabaseCache = null;
+  participantDatabaseCacheVersion += 1;
+};
+
+const getAllAttendanceParticipantIds = async () => {
+  const participantIds = [];
+  let from = 0;
+  let totalCount = null;
+
+  while (true) {
+    const { data, error, count } = await supabase
+      ?.from('attendance_records')
+      ?.select('participant_id', { count: 'exact' })
+      ?.order('id', { ascending: true })
+      ?.range(from, from + DATABASE_PAGE_SIZE - 1);
+
+    if (error) throw error;
+
+    const page = data || [];
+    if (totalCount === null && typeof count === 'number') {
+      totalCount = count;
+    }
+    participantIds?.push(...page);
+
+    if (
+      page?.length === 0 ||
+      (totalCount !== null && participantIds?.length >= totalCount) ||
+      (totalCount === null && page?.length < DATABASE_PAGE_SIZE)
+    ) {
+      break;
+    }
+    from += page?.length;
+  }
+
+  return participantIds;
+};
+
+const getAllParticipantRows = async () => {
+  const participants = [];
+  let from = 0;
+  let totalCount = null;
+
+  while (true) {
+    const { data, error, count } = await supabase
+      ?.from('participants')
+      ?.select('*', { count: 'exact' })
+      ?.order('first_name', { ascending: true })
+      ?.order('id', { ascending: true })
+      ?.range(from, from + DATABASE_PAGE_SIZE - 1);
+
+    if (error) throw error;
+
+    const page = data || [];
+    if (totalCount === null && typeof count === 'number') {
+      totalCount = count;
+    }
+    participants?.push(...page);
+
+    if (
+      page?.length === 0 ||
+      (totalCount !== null && participants?.length >= totalCount) ||
+      (totalCount === null && page?.length < DATABASE_PAGE_SIZE)
+    ) {
+      break;
+    }
+    from += page?.length;
+  }
+
+  return participants;
+};
+
+const refreshParticipantDatabaseCache = () => {
+  const currentVersion = participantDatabaseCacheVersion;
+
+  if (participantDatabaseRefresh?.version === currentVersion) {
+    return participantDatabaseRefresh?.promise;
+  }
+
+  let refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const [participantRows, attendanceRows] = await Promise.all([
+        getAllParticipantRows(),
+      getAllAttendanceParticipantIds()
+      ]);
+
+      const participants = toCamelCase(participantRows);
+      const attendanceCounts = participants?.reduce((counts, participant) => {
+        counts[participant?.id] = 0;
+        return counts;
+      }, {});
+
+      attendanceRows?.forEach((record) => {
+        const participantId = record?.participant_id;
+        if (participantId && Object.prototype.hasOwnProperty.call(attendanceCounts, participantId)) {
+          attendanceCounts[participantId] += 1;
+        }
+      });
+
+      const snapshot = {
+        participants,
+        attendanceCounts,
+        fetchedAt: Date.now()
+      };
+
+      if (currentVersion !== participantDatabaseCacheVersion) {
+        return refreshParticipantDatabaseCache();
+      }
+
+      participantDatabaseCache = snapshot;
+      return snapshot;
+    } catch (error) {
+      if (currentVersion !== participantDatabaseCacheVersion) {
+        return refreshParticipantDatabaseCache();
+      }
+      throw error;
+    } finally {
+      if (participantDatabaseRefresh?.promise === refreshPromise) {
+        participantDatabaseRefresh = null;
+      }
+    }
+  })();
+
+  participantDatabaseRefresh = {
+    version: currentVersion,
+    promise: refreshPromise
+  };
+
+  return refreshPromise;
+};
+
 export const attendanceService = {
+  getParticipantDatabaseCache,
+  refreshParticipantDatabaseCache,
+  invalidateParticipantDatabaseCache,
+
   // Get all events
   async getEvents() {
     const { data, error } = await supabase?.from('events')?.select('*')?.order('date', { ascending: true });
@@ -103,6 +247,7 @@ export const attendanceService = {
       })?.select()?.single();
 
     if (error) throw error;
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data);
   },
 
@@ -120,6 +265,7 @@ export const attendanceService = {
       })?.select()?.single();
 
     if (error) throw error;
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data);
   },
 
@@ -130,6 +276,7 @@ export const attendanceService = {
       })?.eq('event_id', eventId)?.eq('participant_id', participantId)?.select()?.single();
 
     if (error) throw error;
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data);
   },
 
@@ -149,6 +296,7 @@ export const attendanceService = {
     }
     
     console.log(`Successfully deleted ${count} attendance record(s)`);
+    invalidateParticipantDatabaseCache();
   },
 
   // Remove check-out time (move from 'out' back to 'in')
@@ -168,6 +316,7 @@ export const attendanceService = {
     }
     
     console.log(`Successfully removed check-out for participant ${participantId}`);
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data?.[0]);
   },
 
@@ -193,6 +342,7 @@ export const attendanceService = {
     const { data, error } = await supabase?.from('attendance_records')?.upsert(records, { onConflict: 'event_id,participant_id' })?.select();
 
     if (error) throw error;
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data);
   },
 
@@ -201,6 +351,7 @@ export const attendanceService = {
     const { error } = await supabase?.from('attendance_records')?.delete()?.eq('event_id', eventId);
 
     if (error) throw error;
+    invalidateParticipantDatabaseCache();
   },
 
   // Active Event Management
@@ -250,6 +401,7 @@ export const attendanceService = {
       ?.eq('is_active', true);
 
     if (error) throw error;
+    invalidateParticipantDatabaseCache();
   },
 
   // Log active event (archive it)
@@ -361,6 +513,7 @@ export const attendanceService = {
 
         // Success - return the created participant
         console.log(`Successfully created participant with ID: ${participantId}`);
+        invalidateParticipantDatabaseCache();
         return toCamelCase(data);
       } catch (error) {
         lastError = error;
@@ -419,6 +572,8 @@ export const attendanceService = {
             throw attendanceError;
           }
         }
+
+        invalidateParticipantDatabaseCache();
       }
 
       // Update event to mark as inactive and save notes
@@ -437,6 +592,7 @@ export const attendanceService = {
 
       if (eventError) throw eventError;
 
+      invalidateParticipantDatabaseCache();
       return toCamelCase(updatedEvent);
     } catch (error) {
       console.error('Error logging event:', error);
@@ -549,6 +705,7 @@ export const attendanceService = {
       console.error('Error updating participant:', error);
       throw error;
     }
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data);
   },
 
@@ -579,6 +736,7 @@ export const attendanceService = {
       console.error('Error updating participant consent:', error);
       throw error;
     }
+    invalidateParticipantDatabaseCache();
     return toCamelCase(data);
   },
 
@@ -615,6 +773,7 @@ export const attendanceService = {
       console.error('Error deleting attendance records:', attendanceError);
       throw attendanceError;
     }
+    invalidateParticipantDatabaseCache();
 
     // Then delete the participant
     const { error } = await supabase
