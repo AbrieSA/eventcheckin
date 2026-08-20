@@ -120,7 +120,7 @@ const PreviousEventsArchive = () => {
 
   const activeTrend = TREND_SERIES[trendSeries];
   const trendYAxisMax = attendanceTrend.reduce(
-    (max, event) => Math.max(max, Number(event?.[activeTrend.key]) || 0),
+    (max, event) => Math.max(max, Number(event?.combinedCount) || 0),
     0
   ) + 10;
 
