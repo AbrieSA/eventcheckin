@@ -168,11 +168,11 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] transform transition-all"
+          className="flex w-full max-w-2xl max-h-[90vh] flex-col overflow-hidden rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)] transform transition-all"
           onClick={(e) => e?.stopPropagation()}>
 
           {/* Header */}
-          <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
+          <div className="flex shrink-0 items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
             <h2 className="text-xl font-semibold text-gray-900">Add Attendee</h2>
             <Button
               onClick={handleClose}
@@ -185,7 +185,7 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-8 px-6 py-6 sm:px-8">
+          <form onSubmit={handleSubmit} className="scrollbar-custom min-h-0 flex-1 overflow-y-auto space-y-8 px-6 py-6 sm:px-8">
             {/* Error Message */}
             {submitError &&
             <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-md flex items-start gap-2">

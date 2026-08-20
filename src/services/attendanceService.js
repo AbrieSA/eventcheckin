@@ -669,6 +669,75 @@ export const attendanceService = {
     return toCamelCase(data);
   },
 
+  // Get a compact attendance summary for the most recent archived events.
+  async getArchivedAttendanceTrend() {
+    const selectFields = `
+      id,
+      event_date,
+      attendance_records (
+        id,
+        label
+      )
+    `;
+
+    const fetchTrend = () => supabase
+      ?.from('events')
+      ?.select(selectFields)
+      ?.eq('is_active', false)
+      ?.order('event_date', { ascending: false })
+      ?.order('id', { ascending: false })
+      ?.limit(12);
+
+    let { data, error } = await fetchTrend();
+
+    // Keep the trend available for databases where the label migration has not run.
+    if (error?.code === '42703' && error?.message?.includes('label')) {
+      ({ data, error } = await supabase
+        ?.from('events')
+        ?.select(`
+          id,
+          event_date,
+          attendance_records (
+            id
+          )
+        `)
+        ?.eq('is_active', false)
+        ?.order('event_date', { ascending: false })
+        ?.order('id', { ascending: false })
+        ?.limit(12));
+    }
+
+    if (error) throw error;
+
+    return toCamelCase(data)?.map((event) => {
+      const records = event?.attendanceRecords || [];
+      const participantCount = records?.filter((record) =>
+        !record?.label || String(record.label).trim().toLowerCase() === 'participant'
+      )?.length || 0;
+      const nonParticipantLabels = new Set([
+        'leader',
+        'volunteer',
+        'non-participant',
+        'non participant',
+        'nonparticipant'
+      ]);
+      const nonParticipantCount = records?.filter((record) =>
+        nonParticipantLabels.has(String(record?.label || '').trim().toLowerCase())
+      )?.length || 0;
+
+      return {
+        id: event?.id,
+        eventDate: event?.eventDate,
+        participantCount,
+        nonParticipantCount,
+        combinedCount: records?.length || 0
+      };
+    })?.sort((a, b) => {
+      const dateDifference = new Date(a?.eventDate).getTime() - new Date(b?.eventDate).getTime();
+      return dateDifference || String(a?.id).localeCompare(String(b?.id));
+    }) || [];
+  },
+
   // Update participant details
   async updateParticipant(participantId, participantData) {
     const dbData = {

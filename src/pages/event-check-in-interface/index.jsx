@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 
@@ -50,6 +50,7 @@ const EventCheckInInterface = () => {
   
   // Track expanded participant rows
   const [expandedParticipants, setExpandedParticipants] = useState({});
+  const pendingPageScrollRestoreRef = useRef(null);
 
   // Load participants on mount
   useEffect(() => {
@@ -242,6 +243,31 @@ const EventCheckInInterface = () => {
     return filtered;
   }, [searchQuery, participants, activeFilter, participantStages]);
 
+  useLayoutEffect(() => {
+    const savedScrollY = pendingPageScrollRestoreRef.current;
+    if (savedScrollY === null) return undefined;
+
+    let restoreFrameId;
+    const layoutFrameId = window.requestAnimationFrame(() => {
+      restoreFrameId = window.requestAnimationFrame(() => {
+        if (pendingPageScrollRestoreRef.current !== savedScrollY) return;
+
+        pendingPageScrollRestoreRef.current = null;
+        const maximumScrollY = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        window.scrollTo({ top: Math.min(savedScrollY, maximumScrollY) });
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(layoutFrameId);
+      if (restoreFrameId) window.cancelAnimationFrame(restoreFrameId);
+    };
+  }, [filteredParticipants]);
+
+  const preservePageScrollForListUpdate = () => {
+    pendingPageScrollRestoreRef.current = window.scrollY;
+  };
+
   const checkedInCount = useMemo(() =>
     Object.values(participantStages)?.filter((stage) => stage === 'in')?.length
   , [participantStages]);
@@ -275,6 +301,7 @@ const EventCheckInInterface = () => {
       // Set timeout for a short visual confirmation before moving tabs
       const timeoutId = setTimeout(async () => {
         // Move to 'in' column after delay
+        preservePageScrollForListUpdate();
         setParticipantStages((prev) => ({
           ...prev,
           [participantId]: 'in'
@@ -323,6 +350,7 @@ const EventCheckInInterface = () => {
 
       // If already in 'in' stage, remove it
       if (participantStages?.[participantId] === 'in') {
+        preservePageScrollForListUpdate();
         setParticipantStages((prev) => {
           const updated = { ...prev };
           delete updated?.[participantId];
@@ -350,6 +378,7 @@ const EventCheckInInterface = () => {
       // Set timeout for a short visual confirmation before moving tabs
       const timeoutId = setTimeout(async () => {
         // Move to 'out' column after delay
+        preservePageScrollForListUpdate();
         setParticipantStages((prev) => ({
           ...prev,
           [participantId]: 'out'
@@ -397,6 +426,7 @@ const EventCheckInInterface = () => {
 
       // If already in 'out' stage, move back to 'in'
       if (participantStages?.[participantId] === 'out') {
+        preservePageScrollForListUpdate();
         setParticipantStages((prev) => ({
           ...prev,
           [participantId]: 'in'
@@ -423,6 +453,7 @@ const EventCheckInInterface = () => {
     const previousStage = participantStages?.[participantId];
 
     // Optimistic update - move from 'out' to 'in'
+    preservePageScrollForListUpdate();
     setParticipantStages((prev) => ({
       ...prev,
       [participantId]: 'in'
@@ -450,6 +481,7 @@ const EventCheckInInterface = () => {
     const previousStage = participantStages?.[participantId];
 
     // Optimistic update - remove from participantStages (moves back to check-in)
+    preservePageScrollForListUpdate();
     setParticipantStages((prev) => {
       const updated = { ...prev };
       delete updated?.[participantId];
@@ -565,14 +597,20 @@ const EventCheckInInterface = () => {
           {/* Toggle Buttons */}
           <div className="mb-6 flex gap-1 rounded-full border border-slate-200 bg-white/90 p-1 shadow-sm">
             <button
-              onClick={() => setActiveFilter('check-in')}
+              onClick={() => {
+                preservePageScrollForListUpdate();
+                setActiveFilter('check-in');
+              }}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
               activeFilter === 'check-in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
               }>
               Check-In
             </button>
             <button
-              onClick={() => setActiveFilter('in')}
+              onClick={() => {
+                preservePageScrollForListUpdate();
+                setActiveFilter('in');
+              }}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
               activeFilter === 'in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
               }
@@ -581,7 +619,10 @@ const EventCheckInInterface = () => {
               {checkedInRoleLabel}
             </button>
             <button
-              onClick={() => setActiveFilter('out')}
+              onClick={() => {
+                preservePageScrollForListUpdate();
+                setActiveFilter('out');
+              }}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
               activeFilter === 'out' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
               }>
@@ -597,7 +638,10 @@ const EventCheckInInterface = () => {
               type="search"
               placeholder="Search Bar"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e?.target?.value)}
+              onChange={(e) => {
+                preservePageScrollForListUpdate();
+                setSearchQuery(e?.target?.value);
+              }}
               onFocus={(e) => e?.target?.select()}
               onClick={(e) => e?.target?.select()}
               className="w-full border-slate-200 bg-slate-50/80" />
