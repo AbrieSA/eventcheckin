@@ -12,6 +12,7 @@ const createParticipantFormData = (participant) => ({
   phone: participant?.phone || '',
   allergies: participant?.allergiesDetails || '',
   medicalConditions: participant?.medicalConditionDetails || '',
+  notes: participant?.notes || '',
   medicare: participant?.medicare || '',
   ecName: participant?.emergencyContactName || '',
   ecLastName: participant?.emergencyContactSurname || '',
@@ -30,15 +31,11 @@ const ParticipantDetailsModal = ({
   participant,
   onClose,
   onUpdate,
-  onDelete,
-  initialEditMode = false,
-  initialDraft = null,
-  onDraftChange,
-  onClearDraft
+  onDelete
 }) => {
-  const [isEditMode, setIsEditMode] = useState(initialEditMode);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [formData, setFormData] = useState(() => initialDraft || createParticipantFormData(participant));
+  const [formData, setFormData] = useState(() => createParticipantFormData(participant));
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -57,23 +54,12 @@ const ParticipantDetailsModal = ({
     }
   };
 
-  const persistDraft = (nextFormData, nextEditMode = isEditMode) => {
-    if (!participant?.id || !nextEditMode || !onDraftChange) return;
-
-    onDraftChange({
-      participantId: participant?.id,
-      isEditMode: nextEditMode,
-      formData: nextFormData
-    });
-  };
-
   const handleInputChange = (field, value) => {
     setFormData(prev => {
       const nextFormData = {
         ...prev,
         [field]: value
       };
-      persistDraft(nextFormData);
       return nextFormData;
     });
   };
@@ -82,9 +68,6 @@ const ParticipantDetailsModal = ({
     if (isEditMode) {
       // Cancel edit - reset form data
       setFormData(createParticipantFormData(participant));
-      onClearDraft?.();
-    } else {
-      persistDraft(formData, true);
     }
     setIsEditMode(!isEditMode);
   };
@@ -103,7 +86,6 @@ const ParticipantDetailsModal = ({
       }
       
       // Close the modal after successful save so it shows fresh data when reopened
-      onClearDraft?.();
       setIsEditMode(false);
       onClose();
     } catch (error) {
@@ -118,45 +100,18 @@ const ParticipantDetailsModal = ({
     // Reset form data to original values
     setFormData(createParticipantFormData(participant));
     setIsEditMode(false);
-    onClearDraft?.();
   };
 
   const handleConsentChange = async (consentField, value) => {
-    try {
-      // Update local state immediately for responsive UI
-      setFormData(prev => {
-        const nextFormData = {
-          ...prev,
-          [consentField]: value
-        };
-        persistDraft(nextFormData);
-        return nextFormData;
-      });
+    if (!isEditMode) return;
 
-      if (isEditMode) {
-        return;
-      }
-
-      // Update database
-      const updatedParticipant = await attendanceService?.updateParticipantConsent(
-        participant?.id,
-        consentField,
-        value
-      );
-
-      // Call onUpdate callback if provided
-      if (onUpdate) {
-        onUpdate(updatedParticipant);
-      }
-    } catch (error) {
-      console.error('Error updating consent:', error);
-      alert(`Failed to update consent: ${error?.message || 'Unknown error'}`);
-      // Revert local state on error
-      setFormData(prev => ({
+    setFormData(prev => {
+      const nextFormData = {
         ...prev,
-        [consentField]: !value
-      }));
-    }
+        [consentField]: value
+      };
+      return nextFormData;
+    });
   };
 
   const handleDeleteClick = () => {
@@ -169,7 +124,6 @@ const ParticipantDetailsModal = ({
       if (onDelete) {
         await onDelete(participant?.id);
       }
-      onClearDraft?.();
       setShowDeleteConfirm(false);
       onClose();
     } catch (error) {
@@ -214,9 +168,9 @@ const ParticipantDetailsModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
+        <div className="flex shrink-0 items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
           <h2 className="text-xl font-bold text-foreground">Attendee Details</h2>
           <div className="flex items-center space-x-2">
             <Button
@@ -250,7 +204,7 @@ const ParticipantDetailsModal = ({
         </div>
 
         {/* Content */}
-        <div className="space-y-8 px-6 py-6 sm:px-8">
+        <div className="scrollbar-custom min-h-0 flex-1 overflow-y-auto space-y-8 px-6 py-6 sm:px-8">
           {/* Attendee Details Section */}
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-5">Attendee Details</h3>
@@ -328,6 +282,31 @@ const ParticipantDetailsModal = ({
 
               {/* Medicare */}
               {renderField('Medicare', participant?.medicare, 'medicare')}
+
+              {/* Notes */}
+              <div className="md:col-span-2">
+                {isEditMode ? (
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1" htmlFor="participant-notes">
+                      Notes <span className="font-normal">(optional)</span>
+                    </label>
+                    <textarea
+                      id="participant-notes"
+                      value={formData?.notes || ''}
+                      onChange={(e) => handleInputChange('notes', e?.target?.value)}
+                      className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      rows="3"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="block text-sm font-medium text-muted-foreground mb-1">Notes</label>
+                    <div className="whitespace-pre-wrap px-3 py-2 bg-muted/30 border border-border rounded-lg text-sm text-foreground">
+                      {participant?.notes || 'None'}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -400,11 +379,12 @@ const ParticipantDetailsModal = ({
                   id="formReceived"
                   checked={formData?.formReceived}
                   onChange={(e) => handleConsentChange('formReceived', e?.target?.checked)}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                  disabled={!isEditMode}
+                  className={`w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                 />
                 <label
                   htmlFor="formReceived"
-                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                  className={`text-sm font-medium text-foreground flex-1 ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                 >
                   Form Received
                 </label>
@@ -417,11 +397,12 @@ const ParticipantDetailsModal = ({
                   id="mediaConsent"
                   checked={formData?.mediaConsent}
                   onChange={(e) => handleConsentChange('mediaConsent', e?.target?.checked)}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                  disabled={!isEditMode}
+                  className={`w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                 />
                 <label
                   htmlFor="mediaConsent"
-                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                  className={`text-sm font-medium text-foreground flex-1 ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                 >
                   Media consent
                 </label>
@@ -434,11 +415,12 @@ const ParticipantDetailsModal = ({
                   id="futureContactConsent"
                   checked={formData?.futureContactConsent}
                   onChange={(e) => handleConsentChange('futureContactConsent', e?.target?.checked)}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                  disabled={!isEditMode}
+                  className={`w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                 />
                 <label
                   htmlFor="futureContactConsent"
-                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                  className={`text-sm font-medium text-foreground flex-1 ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                 >
                   Future contact consent
                 </label>
@@ -451,11 +433,12 @@ const ParticipantDetailsModal = ({
                   id="emergencyTreatmentConsent"
                   checked={formData?.emergencyTreatmentConsent}
                   onChange={(e) => handleConsentChange('emergencyTreatmentConsent', e?.target?.checked)}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                  disabled={!isEditMode}
+                  className={`w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                 />
                 <label
                   htmlFor="emergencyTreatmentConsent"
-                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                  className={`text-sm font-medium text-foreground flex-1 ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                 >
                   Emergency treatment consent
                 </label>
@@ -468,11 +451,12 @@ const ParticipantDetailsModal = ({
                   id="selfSignOutConsent"
                   checked={formData?.selfSignOutConsent}
                   onChange={(e) => handleConsentChange('selfSignOutConsent', e?.target?.checked)}
-                  className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary cursor-pointer"
+                  disabled={!isEditMode}
+                  className={`w-4 h-4 text-primary bg-background border-border rounded focus:ring-2 focus:ring-primary ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'}`}
                 />
                 <label
                   htmlFor="selfSignOutConsent"
-                  className="text-sm font-medium text-foreground cursor-pointer flex-1"
+                  className={`text-sm font-medium text-foreground flex-1 ${isEditMode ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}`}
                 >
                   Permission to self-sign out
                 </label>

@@ -204,9 +204,17 @@
   }
 
   .scrollbar-custom::-webkit-scrollbar-track {
-    @apply bg-muted rounded-md;
+    @apply bg-transparent;
   }
-.scrollbar-custom::-webkit-scrollbar-thumb  {
-    @apply rounded-md;
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-border;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+
+  .scrollbar-custom {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
   }
 }

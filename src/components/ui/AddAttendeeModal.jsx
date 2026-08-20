@@ -14,6 +14,7 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
     role: 'Participant',
     allergies: '',
     medicalConditions: '',
+    notes: '',
     medicare: '',
     ecName: '',
     ecLastName: '',
@@ -134,6 +135,7 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
       role: 'Participant',
       allergies: '',
       medicalConditions: '',
+      notes: '',
       medicare: '',
       ecName: '',
       ecLastName: '',
@@ -343,6 +345,21 @@ const AddAttendeeModal = ({ isOpen, onClose, onAddAttendee }) => {
                     placeholder="Conditions" />
 
                 </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2" htmlFor="attendee-notes">
+                  Notes <span className="font-normal text-gray-500">(optional)</span>
+                </label>
+                <textarea
+                  id="attendee-notes"
+                  name="notes"
+                  value={formData?.notes}
+                  onChange={handleChange}
+                  rows="3"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Add any relevant participant notes"
+                />
               </div>
 
               {/* Medicare Row */}

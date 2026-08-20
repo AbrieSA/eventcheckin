@@ -204,6 +204,7 @@ export const attendanceService = {
           allergies,
           has_medical_conditions,
           medical_notes,
+          notes,
           emergency_contact_name,
           emergency_contact_phone,
           emergency_contact_relationship
@@ -478,6 +479,7 @@ export const attendanceService = {
           has_allergies: !!participantData?.allergies,
           medical_condition_details: participantData?.medicalConditions || null,
           has_medical_conditions: !!participantData?.medicalConditions,
+          notes: participantData?.notes?.trim() || null,
           medicare: participantData?.medicare || null,
           emergency_contact_name: participantData?.ecName,
           emergency_contact_surname: participantData?.ecLastName,
@@ -680,6 +682,7 @@ export const attendanceService = {
       has_allergies: !!participantData?.allergies,
       medical_condition_details: participantData?.medicalConditions || null,
       has_medical_conditions: !!participantData?.medicalConditions,
+      notes: participantData?.notes?.trim() || null,
       medicare: participantData?.medicare || null,
       emergency_contact_name: participantData?.ecName,
       emergency_contact_surname: participantData?.ecLastName,

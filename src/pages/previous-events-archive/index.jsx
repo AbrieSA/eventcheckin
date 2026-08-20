@@ -9,7 +9,6 @@ const PreviousEventsArchive = () => {
   const navigate = useNavigate();
   const [selectOption, setSelectOption] = useState('all');
   const [eventNameSearch, setEventNameSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -47,13 +46,6 @@ const PreviousEventsArchive = () => {
       );
     }
 
-    // Category filter
-    if (categoryFilter) {
-      filtered = filtered?.filter((event) =>
-        event?.category?.toLowerCase()?.includes(categoryFilter?.toLowerCase())
-      );
-    }
-
     // Date filter
     if (dateFilter) {
       filtered = filtered?.filter((event) => {
@@ -63,7 +55,7 @@ const PreviousEventsArchive = () => {
     }
 
     setFilteredEvents(filtered);
-  }, [eventNameSearch, categoryFilter, dateFilter, events]);
+  }, [eventNameSearch, dateFilter, events]);
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);
@@ -92,7 +84,7 @@ const PreviousEventsArchive = () => {
           <p className="mt-2 text-sm text-slate-500">Search past events and open a cleaner event summary modal from here.</p>
         </div>
         {/* Filters Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2">
           {/* Event Name Search */}
           <div>
             <Input
@@ -100,16 +92,6 @@ const PreviousEventsArchive = () => {
               placeholder="Event name"
               value={eventNameSearch}
               onChange={(e) => setEventNameSearch(e?.target?.value)}
-              className="w-full" />
-          </div>
-
-          {/* Category Filter */}
-          <div>
-            <Input
-              type="text"
-              placeholder="Category"
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e?.target?.value)}
               className="w-full" />
           </div>
 
@@ -145,9 +127,6 @@ const PreviousEventsArchive = () => {
                     Date
                   </th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
-                    Category
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
                     Attended
                   </th>
                 </tr>
@@ -166,15 +145,12 @@ const PreviousEventsArchive = () => {
                         {event?.eventDate ? new Date(event?.eventDate)?.toLocaleDateString('en-GB') : 'N/A'}
                       </td>
                       <td className="py-4 px-4 text-sm text-slate-600">
-                        {event?.category || 'N/A'}
-                      </td>
-                      <td className="py-4 px-4 text-sm text-slate-600">
                         {event?.attendanceRecords?.length || 0}
                       </td>
                     </tr>
                   ) :
                   <tr>
-                    <td colSpan="4" className="py-8 px-4 text-center text-sm text-gray-500">
+                    <td colSpan="3" className="py-8 px-4 text-center text-sm text-gray-500">
                       No events found
                     </td>
                   </tr>

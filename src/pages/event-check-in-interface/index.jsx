@@ -246,6 +246,24 @@ const EventCheckInInterface = () => {
     Object.values(participantStages)?.filter((stage) => stage === 'in')?.length
   , [participantStages]);
 
+  const checkedInRoleCounts = useMemo(() =>
+    participants.reduce((counts, participant) => {
+      if (participantStages?.[participant?.id] !== 'in') return counts;
+
+      const normalizedRole = participant?.role?.trim()?.toLowerCase();
+      if (!normalizedRole || normalizedRole === 'participant') {
+        counts.participants += 1;
+      } else {
+        counts.nonParticipants += 1;
+      }
+
+      return counts;
+    }, { participants: 0, nonParticipants: 0 })
+  , [participants, participantStages]);
+
+  const checkedInRoleLabel = `In (${checkedInRoleCounts.participants}/${checkedInRoleCounts.nonParticipants})`;
+  const checkedInRoleAccessibilityLabel = `In: ${checkedInRoleCounts.participants} participants, ${checkedInRoleCounts.nonParticipants} non-participants`;
+
   // Handle checkbox in Check-In tab - moves to In tab
   const handleCheckInToggle = async (participantId, checked) => {
     if (!activeEvent?.id) return;
@@ -557,8 +575,10 @@ const EventCheckInInterface = () => {
               onClick={() => setActiveFilter('in')}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
               activeFilter === 'in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
-              }>
-              In ({checkedInCount})
+              }
+              aria-label={checkedInRoleAccessibilityLabel}
+              title={checkedInRoleAccessibilityLabel}>
+              {checkedInRoleLabel}
             </button>
             <button
               onClick={() => setActiveFilter('out')}
@@ -578,6 +598,8 @@ const EventCheckInInterface = () => {
               placeholder="Search Bar"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e?.target?.value)}
+              onFocus={(e) => e?.target?.select()}
+              onClick={(e) => e?.target?.select()}
               className="w-full border-slate-200 bg-slate-50/80" />
           </div>
           <Button
@@ -767,6 +789,12 @@ const EventCheckInInterface = () => {
                                       {participant?.hasMedicalConditions ? (participant?.medicalConditionDetails || participant?.medicalNotes || 'Yes') : 'None'}
                                     </span>
                                   </div>
+                                  {participant?.notes?.trim() && (
+                                    <div>
+                                      <span className="text-gray-600">Notes: </span>
+                                      <span className="whitespace-pre-wrap text-gray-900 font-medium">{participant.notes}</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 
@@ -894,6 +922,12 @@ const EventCheckInInterface = () => {
                                       {participant?.hasMedicalConditions ? (participant?.medicalConditionDetails || participant?.medicalNotes || 'Yes') : 'None'}
                                     </span>
                                   </div>
+                                  {participant?.notes?.trim() && (
+                                    <div>
+                                      <span className="text-gray-600">Notes: </span>
+                                      <span className="whitespace-pre-wrap text-gray-900 font-medium">{participant.notes}</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 
@@ -1140,6 +1174,12 @@ const EventCheckInInterface = () => {
                                     {participant?.hasMedicalConditions ? (participant?.medicalConditionDetails || participant?.medicalNotes || 'Yes') : 'None'}
                                   </span>
                                 </div>
+                                {participant?.notes?.trim() && (
+                                  <div>
+                                    <span className="text-gray-600">Notes: </span>
+                                    <span className="whitespace-pre-wrap text-gray-900 font-medium">{participant.notes}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
 
@@ -1331,6 +1371,12 @@ const EventCheckInInterface = () => {
                                       {participant?.hasMedicalConditions ? (participant?.medicalConditionDetails || participant?.medicalNotes || 'Yes') : 'None'}
                                     </span>
                                   </div>
+                                  {participant?.notes?.trim() && (
+                                    <div>
+                                      <span className="text-gray-600">Notes: </span>
+                                      <span className="whitespace-pre-wrap text-gray-900 font-medium">{participant.notes}</span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
 

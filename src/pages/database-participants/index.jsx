@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
@@ -11,17 +11,6 @@ import AttendanceHistoryModal from './components/AttendanceHistoryModal';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
 import { buildCsv } from '../../utils/csv';
-
-const PARTICIPANT_EDIT_DRAFT_KEY = 'eventme_database_participant_edit_draft';
-
-const readParticipantEditDraft = () => {
-  try {
-    const rawDraft = sessionStorage?.getItem(PARTICIPANT_EDIT_DRAFT_KEY);
-    return rawDraft ? JSON.parse(rawDraft) : null;
-  } catch (error) {
-    return null;
-  }
-};
 
 const DatabaseParticipants = () => {
   const initialDatabaseCache = attendanceService?.getParticipantDatabaseCache();
@@ -40,27 +29,8 @@ const DatabaseParticipants = () => {
   const [attendanceCounts, setAttendanceCounts] = useState(() => initialDatabaseCache?.attendanceCounts || {});
   const [selectedAttendanceParticipant, setSelectedAttendanceParticipant] = useState(null);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
-  const [participantEditDraft, setParticipantEditDraft] = useState(() => readParticipantEditDraft());
   const [testEmailStatus, setTestEmailStatus] = useState(null); // null | 'sending' | 'sent' | 'failed'
   const [errorLogStatus, setErrorLogStatus] = useState(null); // null | 'downloading' | 'done' | 'failed'
-
-  const handleParticipantDraftChange = useCallback((draft) => {
-    try {
-      sessionStorage?.setItem(PARTICIPANT_EDIT_DRAFT_KEY, JSON.stringify(draft));
-      setParticipantEditDraft(draft);
-    } catch (error) {
-      console.error('Error saving participant edit draft:', error);
-    }
-  }, []);
-
-  const clearParticipantEditDraft = useCallback(() => {
-    try {
-      sessionStorage?.removeItem(PARTICIPANT_EDIT_DRAFT_KEY);
-    } catch (error) {
-      console.error('Error clearing participant edit draft:', error);
-    }
-    setParticipantEditDraft(null);
-  }, []);
 
   useEffect(() => {
     loadParticipants({ background: !!initialDatabaseCache });
@@ -69,17 +39,6 @@ const DatabaseParticipants = () => {
   useEffect(() => {
     filterParticipants();
   }, [searchName, searchEvents, participants]);
-
-  useEffect(() => {
-    if (selectedParticipant || !participantEditDraft?.participantId || participants?.length === 0) return;
-
-    const draftParticipant = participants?.find((participant) => participant?.id === participantEditDraft?.participantId);
-    if (draftParticipant) {
-      setSelectedParticipant(draftParticipant);
-    } else {
-      clearParticipantEditDraft();
-    }
-  }, [participants, participantEditDraft, selectedParticipant, clearParticipantEditDraft]);
 
   const loadParticipants = async ({ background = hasSnapshot } = {}) => {
     if (background) {
@@ -145,12 +104,10 @@ const DatabaseParticipants = () => {
   };
 
   const handleParticipantClick = (participant) => {
-    clearParticipantEditDraft();
     setSelectedParticipant(participant);
   };
 
   const handleCloseModal = () => {
-    clearParticipantEditDraft();
     setSelectedParticipant(null);
   };
 
@@ -289,7 +246,7 @@ const DatabaseParticipants = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowOptions(!showOptions)}
-                className="w-full sm:w-auto min-w-[120px] justify-between"
+                className="w-full sm:w-auto min-w-[120px] justify-between text-foreground hover:text-foreground focus-visible:text-foreground"
                 iconName="ChevronDown"
                 iconPosition="right">
 
@@ -301,17 +258,17 @@ const DatabaseParticipants = () => {
                   onClick={() => {
                     handleAddParticipant();
                   }}
-                  className="flex w-full items-center space-x-3 rounded-t-2xl px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700">
-                    <Icon name="UserPlus" size={18} className="text-gray-700 dark:text-gray-300" />
+                  className="flex w-full items-center space-x-3 rounded-t-2xl px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:bg-gray-100 focus-visible:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:focus-visible:bg-gray-700 dark:focus-visible:text-gray-100">
+                    <Icon name="UserPlus" size={18} className="text-gray-900 dark:text-gray-100" />
                     <span className="text-base">Add Participant</span>
                   </button>
                   <button
                   onClick={() => {
                     handleExport();
                   }}
-                  className="flex w-full items-center space-x-3 rounded-b-2xl px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-700">
+                  className="flex w-full items-center space-x-3 rounded-b-2xl px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:bg-gray-100 focus-visible:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:focus-visible:bg-gray-700 dark:focus-visible:text-gray-100">
 
-                    <Icon name="Download" size={18} className="text-gray-700 dark:text-gray-300" />
+                    <Icon name="Download" size={18} className="text-gray-900 dark:text-gray-100" />
                     <span className="text-base">List export</span>
                   </button>
                 </div>
@@ -437,11 +394,7 @@ const DatabaseParticipants = () => {
         participant={selectedParticipant}
         onClose={handleCloseModal}
         onUpdate={handleUpdateParticipant}
-        onDelete={handleDeleteParticipant}
-        initialEditMode={participantEditDraft?.participantId === selectedParticipant?.id ? participantEditDraft?.isEditMode : false}
-        initialDraft={participantEditDraft?.participantId === selectedParticipant?.id ? participantEditDraft?.formData : null}
-        onDraftChange={handleParticipantDraftChange}
-        onClearDraft={clearParticipantEditDraft} />
+        onDelete={handleDeleteParticipant} />
 
       }
       {/* Attendance History Modal */}
