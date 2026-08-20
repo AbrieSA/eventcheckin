@@ -1,0 +1,4 @@
+interface:
+  display_name: "EventMe Updater"
+  short_description: "Maintain and publish the EventMe check-in app"
+  default_prompt: "Use $eventcheckin-updater to safely update and verify the EventMe app."
