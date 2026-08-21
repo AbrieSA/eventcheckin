@@ -123,6 +123,15 @@ const PreviousEventsArchive = () => {
     (max, event) => Math.max(max, Number(event?.combinedCount) || 0),
     0
   ) + 10;
+  const trendAverage = attendanceTrend.length
+    ? attendanceTrend.reduce(
+      (total, event) => total + (Number(event?.[activeTrend.key]) || 0),
+      0
+    ) / attendanceTrend.length
+    : 0;
+  const formattedTrendAverage = new Intl.NumberFormat('en-AU', {
+    maximumFractionDigits: 1
+  }).format(trendAverage);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 p-4 sm:p-6 lg:p-8">
@@ -143,7 +152,13 @@ const PreviousEventsArchive = () => {
         </div>
         <section className="mb-8 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 shadow-sm sm:p-6" aria-labelledby="attendance-trend-title">
           <h2 id="attendance-trend-title" className="sr-only">Attendance trend</h2>
-          <div className="flex justify-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {!trendLoading && !trendError && attendanceTrend.length > 0 && (
+              <p className="text-sm text-slate-600" aria-live="polite">
+                <span className="font-medium text-slate-700">Average attendance</span>{' '}
+                <span className="font-semibold text-slate-900">{formattedTrendAverage}</span>
+              </p>
+            )}
             <div className="inline-flex w-full rounded-xl border border-slate-200 bg-white p-1 sm:w-auto" role="group" aria-label="Attendance series">
               {Object.entries(TREND_SERIES).map(([value, option]) => (
                 <button
@@ -201,7 +216,7 @@ const PreviousEventsArchive = () => {
                     </defs>
                     <CartesianGrid vertical={false} stroke="#cbd5e1" strokeDasharray="3 3" />
                     <XAxis dataKey="eventDate" tickFormatter={formatTrendDate} tick={{ fill: '#64748b', fontSize: 12 }} axisLine={false} tickLine={false} minTickGap={20} />
-                    <YAxis domain={[0, trendYAxisMax]} allowDecimals={false} tickCount={6} tick={{ fill: '#334155', fontSize: 14, fontWeight: 400 }} axisLine={false} tickLine={false} tickMargin={10} width={52} />
+                    <YAxis domain={[0, trendYAxisMax]} allowDecimals={false} tickCount={6} tickFormatter={(value) => (value === 0 ? '' : value)} tick={{ fill: '#334155', fontSize: 14, fontWeight: 400 }} axisLine={false} tickLine={false} tickMargin={10} width={52} />
                     <Tooltip content={<AttendanceTrendTooltip seriesLabel={activeTrend.label} />} labelFormatter={formatTrendDate} />
                     <Area type="monotone" dataKey={activeTrend.key} name={activeTrend.label} stroke="#047857" strokeWidth={3} fill="url(#archivedAttendanceFill)" dot={{ r: 4, fill: '#047857', stroke: '#ffffff', strokeWidth: 2 }} activeDot={{ r: 6 }} isAnimationActive={false} />
                   </AreaChart>
