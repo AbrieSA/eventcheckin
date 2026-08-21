@@ -170,17 +170,18 @@ const ParticipantDetailsModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
       <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[30px] border border-border/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.16)]">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-border/70 bg-white px-6 py-5 sm:px-8">
+        <div className="flex shrink-0 flex-col gap-3 border-b border-border/70 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <h2 className="text-xl font-bold text-foreground">Attendee Details</h2>
-          <div className="flex items-center space-x-2">
+          <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:w-auto">
             <Button
               variant="surface"
               size="sm"
-              className="text-sm"
+              className="min-w-0 text-sm"
               onClick={handleToggleEdit}
               disabled={isSaving}
             >
-              {isEditMode ? 'Cancel Edit' : 'Edit Details Toggle'}
+              <span className="sm:hidden">{isEditMode ? 'Cancel' : 'Edit'}</span>
+              <span className="hidden sm:inline">{isEditMode ? 'Cancel Edit' : 'Edit Details'}</span>
             </Button>
             <Button
               variant="surfaceDanger"
