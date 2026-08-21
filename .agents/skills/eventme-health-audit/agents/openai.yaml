@@ -1,0 +1,4 @@
+interface:
+  display_name: "EventMe Health Audit"
+  short_description: "Audit EventMe code, branches, data, and deployment"
+  default_prompt: "Use $eventme-health-audit to check whether EventMe main, production, and application safeguards are healthy."
