@@ -121,12 +121,12 @@ const HomeDashboard = () => {
               className="flex items-center space-x-2 sm:space-x-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-2 hover:bg-primary/5 transition-colors"
               aria-label="Home"
             >
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-primary/10 rounded-lg">
                 <Icon 
                   name="Home" 
-                  size={25} 
+                  size={32}
                   color="var(--color-primary)" 
-                  className="sm:w-9 sm:h-9"
+                  className="h-8 w-8 shrink-0"
                 />
               </div>
               <h1 className="text-xl sm:text-2xl font-heading font-semibold text-foreground">
@@ -190,17 +190,17 @@ const HomeDashboard = () => {
               {showAdminButtons && (
                 <button
                   onClick={handleCancelEvent}
-                  className="w-full bg-red-50 hover:bg-red-100 border-2 border-red-300 hover:border-red-500 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl p-8 group focus:outline-none focus:ring-4 focus:ring-red-300 active:scale-[0.98]"
+                  className="flex min-h-[96px] w-full items-center justify-center bg-red-50 hover:bg-red-100 border-2 border-red-300 hover:border-red-500 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl px-6 py-3 group focus:outline-none focus:ring-4 focus:ring-red-300 active:scale-[0.98]"
                 >
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="flex items-center justify-center w-16 h-16 bg-red-100 group-hover:bg-red-200 rounded-full transition-colors">
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="flex items-center justify-center w-10 h-10 bg-red-100 group-hover:bg-red-200 rounded-full transition-colors">
                       <Icon
                         name="X"
-                        size={32}
+                        size={20}
                         color="#ef4444"
                       />
                     </div>
-                    <span className="text-xl font-semibold text-red-600 group-hover:text-red-700 transition-colors">
+                    <span className="text-base font-semibold text-red-600 group-hover:text-red-700 transition-colors">
                       Cancel Event
                     </span>
                   </div>

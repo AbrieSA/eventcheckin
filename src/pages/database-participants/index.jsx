@@ -31,6 +31,7 @@ const DatabaseParticipants = () => {
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
   const [testEmailStatus, setTestEmailStatus] = useState(null); // null | 'sending' | 'sent' | 'failed'
   const [errorLogStatus, setErrorLogStatus] = useState(null); // null | 'downloading' | 'done' | 'failed'
+  const [sortConfig, setSortConfig] = useState(null);
 
   useEffect(() => {
     loadParticipants({ background: !!initialDatabaseCache });
@@ -38,7 +39,7 @@ const DatabaseParticipants = () => {
 
   useEffect(() => {
     filterParticipants();
-  }, [searchName, searchEvents, participants]);
+  }, [searchName, searchEvents, participants, attendanceCounts, sortConfig]);
 
   const loadParticipants = async ({ background = hasSnapshot } = {}) => {
     if (background) {
@@ -86,7 +87,52 @@ const DatabaseParticipants = () => {
 
       // This would require joining with attendance_records table
       // For now, just a placeholder filter
-    }setFilteredParticipants(filtered);};
+    }
+
+    if (sortConfig) {
+      const direction = sortConfig?.direction === 'asc' ? 1 : -1;
+      filtered.sort((firstParticipant, secondParticipant) => {
+        const firstName = `${firstParticipant?.firstName || ''} ${firstParticipant?.lastName || ''}`?.trim();
+        const secondName = `${secondParticipant?.firstName || ''} ${secondParticipant?.lastName || ''}`?.trim();
+        const firstValue = sortConfig?.key === 'events'
+          ? Number(attendanceCounts?.[firstParticipant?.id] || 0)
+          : firstName;
+        const secondValue = sortConfig?.key === 'events'
+          ? Number(attendanceCounts?.[secondParticipant?.id] || 0)
+          : secondName;
+        const comparison = typeof firstValue === 'number'
+          ? firstValue - secondValue
+          : firstValue.localeCompare(secondValue, undefined, { sensitivity: 'base' });
+
+        if (comparison !== 0) return comparison * direction;
+
+        const nameComparison = firstName.localeCompare(secondName, undefined, { sensitivity: 'base' });
+        if (nameComparison !== 0) return nameComparison;
+
+        return String(firstParticipant?.id || '').localeCompare(String(secondParticipant?.id || ''));
+      });
+    }
+
+    setFilteredParticipants(filtered);
+  };
+
+  const handleSort = (key) => {
+    setSortConfig((currentSort) => {
+      const isParticipantSort = key === 'participant';
+      const initialDirection = isParticipantSort ? 'asc' : 'desc';
+      const toggledDirection = currentSort?.direction === 'asc' ? 'desc' : 'asc';
+
+      return {
+        key,
+        direction: currentSort?.key === key ? toggledDirection : initialDirection
+      };
+    });
+  };
+
+  const getSortIndicator = (key) => {
+    if (sortConfig?.key !== key) return null;
+    return sortConfig?.direction === 'asc' ? 'ArrowUp' : 'ArrowDown';
+  };
   const handleExport = () => {
     setShowExportModal(true);
     setShowOptions(false);
@@ -216,8 +262,8 @@ const DatabaseParticipants = () => {
               className="flex items-center space-x-2 sm:space-x-4 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-lg p-2 hover:bg-primary/5 transition-colors"
               aria-label="Home">
 
-              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-primary/10 rounded-lg">
-                <Icon name="Home" size={24} className="text-primary" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-primary/10 rounded-lg">
+                <Icon name="Home" size={32} className="h-8 w-8 shrink-0 text-primary" />
               </div>
               <h1 className="text-xl sm:text-2xl font-bold text-foreground">Database</h1>
             </button>
@@ -328,14 +374,34 @@ const DatabaseParticipants = () => {
               <table className="w-full">
                 <thead className="bg-muted/50 border-b border-border">
                   <tr>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                      Participant
+                    <th
+                      scope="col"
+                      aria-sort={sortConfig?.key === 'participant' ? (sortConfig?.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      <button
+                        type="button"
+                        onClick={() => handleSort('participant')}
+                        className="inline-flex items-center gap-1 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        aria-label={`Sort participants ${sortConfig?.key === 'participant' && sortConfig?.direction === 'asc' ? 'Z to A' : 'A to Z'}`}>
+                        Participant
+                        {getSortIndicator('participant') && <Icon name={getSortIndicator('participant')} size={16} aria-hidden="true" />}
+                      </button>
                     </th>
                     <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
                       Emergency Contact
                     </th>
-                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                      Events Attended
+                    <th
+                      scope="col"
+                      aria-sort={sortConfig?.key === 'events' ? (sortConfig?.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      <button
+                        type="button"
+                        onClick={() => handleSort('events')}
+                        className="inline-flex items-center gap-1 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        aria-label={`Sort events attended ${sortConfig?.key === 'events' && sortConfig?.direction === 'desc' ? 'lowest to highest' : 'highest to lowest'}`}>
+                        Events Attended
+                        {getSortIndicator('events') && <Icon name={getSortIndicator('events')} size={16} aria-hidden="true" />}
+                      </button>
                     </th>
                   </tr>
                 </thead>

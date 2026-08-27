@@ -192,9 +192,11 @@ const UserManagementDashboard = () => {
           <div className="flex items-center justify-between h-16 sm:h-20">
             <BackButton
               onClick={() => navigate('/home-dashboard')}
+              iconName="Home"
+              iconSize={21}
               className="h-11 px-4"
             >
-              Back
+              Home
             </BackButton>
           </div>
         </div>

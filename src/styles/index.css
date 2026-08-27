@@ -4,6 +4,13 @@ body {
   font-family: Inter;
 }
 
+html {
+  /* Reserve the viewport scrollbar gutter so routes do not shift when their
+     content crosses the page-height threshold. */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 * {
   box-sizing: border-box;
   line-height: normal;

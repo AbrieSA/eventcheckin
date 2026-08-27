@@ -139,9 +139,11 @@ const PreviousEventsArchive = () => {
       <div className="max-w-6xl mx-auto mb-4">
         <BackButton
           onClick={() => navigate('/home-dashboard')}
+          iconName="Home"
+          iconSize={21}
           className="shadow-sm"
         >
-          Back
+          Home
         </BackButton>
       </div>
 

@@ -172,7 +172,7 @@ const ParticipantDetailsModal = ({
         {/* Header */}
         <div className="flex shrink-0 flex-col gap-3 border-b border-border/70 bg-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <h2 className="text-xl font-bold text-foreground">Attendee Details</h2>
-          <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-2 sm:flex sm:w-auto">
+          <div className="grid w-full grid-cols-[minmax(0,1fr)_auto_auto_auto] items-center gap-2 sm:flex sm:w-auto">
             <Button
               variant="surface"
               size="sm"
@@ -183,6 +183,16 @@ const ParticipantDetailsModal = ({
               <span className="sm:hidden">{isEditMode ? 'Cancel' : 'Edit'}</span>
               <span className="hidden sm:inline">{isEditMode ? 'Cancel Edit' : 'Edit Details'}</span>
             </Button>
+            {isEditMode && (
+              <Button
+                size="sm"
+                className="min-w-0 text-sm"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            )}
             <Button
               variant="surfaceDanger"
               size="sm"

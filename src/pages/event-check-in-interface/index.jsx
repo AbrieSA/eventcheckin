@@ -557,7 +557,7 @@ const EventCheckInInterface = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-emerald-50/20 p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-emerald-50/20 p-4 font-caption text-slate-900 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header Section */}
         <div className="mb-6">
@@ -566,17 +566,19 @@ const EventCheckInInterface = () => {
             {/* Back Button */}
               <BackButton
                 onClick={() => navigate('/home-dashboard')}
+                iconName="Home"
+                iconSize={21}
                 className="self-start"
-                aria-label="Return to dashboard"
+                aria-label="Home"
               >
-                Back
+                Home
               </BackButton>
 
             {/* Log Event Button */}
               <Button
                 onClick={handleLogEvent}
                 variant="surface"
-                className="h-11 rounded-full px-6 text-sm font-semibold text-slate-700"
+                className="h-11 rounded-full px-6 text-sm font-normal text-slate-900"
               >
                 Log Event
               </Button>
@@ -602,7 +604,7 @@ const EventCheckInInterface = () => {
                 setActiveFilter('check-in');
               }}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
-              activeFilter === 'check-in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
+              activeFilter === 'check-in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-900 hover:bg-slate-100'}`
               }>
               Check-In
             </button>
@@ -612,7 +614,7 @@ const EventCheckInInterface = () => {
                 setActiveFilter('in');
               }}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
-              activeFilter === 'in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
+              activeFilter === 'in' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-900 hover:bg-slate-100'}`
               }
               aria-label={checkedInRoleAccessibilityLabel}
               title={checkedInRoleAccessibilityLabel}>
@@ -624,7 +626,7 @@ const EventCheckInInterface = () => {
                 setActiveFilter('out');
               }}
               className={`flex-1 rounded-full px-6 py-3 font-medium transition-all ${
-              activeFilter === 'out' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'}`
+              activeFilter === 'out' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-900 hover:bg-slate-100'}`
               }>
               Out
             </button>
@@ -649,7 +651,7 @@ const EventCheckInInterface = () => {
           <Button
             onClick={() => setIsAddAttendeeModalOpen(true)}
             variant="surface"
-            className="h-11 rounded-full px-6 font-semibold text-slate-700 whitespace-nowrap">
+            className="h-11 rounded-full px-6 font-normal text-slate-900 whitespace-nowrap">
             Add Attendee
           </Button>
         </div>
@@ -660,16 +662,16 @@ const EventCheckInInterface = () => {
           <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70">
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700 w-40">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900 w-40">
                     Check-In
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
                     Participant
                   </th>
-                  <th className="hidden md:table-cell px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  <th className="hidden md:table-cell px-6 py-4 text-left text-sm font-semibold text-slate-900">
                     Emergency Contact
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
                     Alerts
                   </th>
                   
@@ -1037,16 +1039,16 @@ const EventCheckInInterface = () => {
           <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70">
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700 w-40">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900 w-40">
                     Checked Out
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
                     Participant
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">
                     Alerts
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-700 w-32">
+                  <th className="w-40 px-6 py-4 text-center text-sm font-semibold text-slate-900">
                     Actions
                   </th>
                 </tr>
@@ -1290,10 +1292,10 @@ const EventCheckInInterface = () => {
           <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70">
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">
+                  <th className="px-12 py-4 text-left text-sm font-semibold text-slate-900 sm:px-24">
                     Participant
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700 w-32">
+                  <th className="w-96 px-12 py-4 text-center text-sm font-semibold text-slate-900 sm:px-24">
                     Action
                   </th>
                 </tr>
@@ -1309,7 +1311,7 @@ const EventCheckInInterface = () => {
                         className="border-b border-slate-200 transition-colors duration-100"
                         style={{ backgroundColor: bgColor || 'transparent' }}
                       >
-                        <td className="px-6 py-4">
+                        <td className="px-12 py-4 sm:px-24">
                           <button
                             onClick={() => toggleParticipantExpansion(participant?.id)}
                             className="flex w-full items-center gap-2 text-left text-sm text-slate-900 transition-colors hover:text-primary"
@@ -1327,14 +1329,16 @@ const EventCheckInInterface = () => {
                             />
                           </button>
                         </td>
-                        <td className="px-6 py-4">
-                          <Button
-                            onClick={() => handleRemoveParticipant(participant?.id)}
-                            variant="surface"
-                            className="h-10 rounded-full px-4 text-sm font-semibold text-slate-700"
-                          >
-                            Remove
-                          </Button>
+                        <td className="w-96 px-12 py-4 sm:px-24">
+                          <div className="flex justify-end">
+                            <Button
+                              onClick={() => handleRemoveParticipant(participant?.id)}
+                              variant="surface"
+                              className="h-10 w-96 rounded-full text-sm font-semibold text-slate-900"
+                            >
+                              Remove
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                       {/* Expanded Details Row */}
