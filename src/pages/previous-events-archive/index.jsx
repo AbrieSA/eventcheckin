@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input';
-import BackButton from '../../components/ui/BackButton';
+import GlobalHeader from '../../components/ui/GlobalHeader';
 import EventDetailsModal from './components/EventDetailsModal';
 import { attendanceService } from '../../services/attendanceService';
 import {
@@ -37,7 +36,6 @@ const AttendanceTrendTooltip = ({ active, payload, label, seriesLabel }) => {
 };
 
 const PreviousEventsArchive = () => {
-  const navigate = useNavigate();
   const [selectOption, setSelectOption] = useState('all');
   const [eventNameSearch, setEventNameSearch] = useState('');
   const [dateFilter, setDateFilter] = useState('');
@@ -134,21 +132,11 @@ const PreviousEventsArchive = () => {
   }).format(trendAverage);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 p-4 sm:p-6 lg:p-8">
-      {/* Back Button */}
-      <div className="max-w-6xl mx-auto mb-4">
-        <BackButton
-          onClick={() => navigate('/home-dashboard')}
-          iconName="Home"
-          iconSize={21}
-          className="shadow-sm"
-        >
-          Home
-        </BackButton>
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100">
+      <GlobalHeader />
 
       {/* Main Modal Container */}
-      <div className="max-w-6xl mx-auto rounded-[32px] border border-slate-200/80 bg-white/92 p-6 shadow-sm backdrop-blur-sm sm:p-8">
+      <div className="max-w-6xl mx-auto my-4 rounded-[32px] border border-slate-200/80 bg-white/92 p-6 shadow-sm backdrop-blur-sm sm:my-6 sm:p-8 lg:my-8">
         <div className="mb-6">
           <h1 className="text-3xl font-heading font-semibold text-slate-900">Archived Events</h1>
         </div>

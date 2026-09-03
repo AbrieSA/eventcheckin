@@ -30,6 +30,11 @@ const getMissingFormLabel = (participant) => {
   return `Form missing: ${weeks} ${weeks === 1 ? 'week' : 'weeks'}`;
 };
 
+const getParticipantSearchText = (participant) => Object.values(participant || {})
+  .filter((value) => typeof value === 'string' || typeof value === 'number')
+  .join(' ')
+  .toLowerCase();
+
 const EventCheckInInterface = () => {
   const navigate = useNavigate();
   const [eventName, setEventName] = useState('');
@@ -207,14 +212,6 @@ const EventCheckInInterface = () => {
   const filteredParticipants = useMemo(() => {
     let filtered = participants;
 
-    // Filter by search query
-    if (searchQuery?.trim()) {
-      const query = searchQuery?.toLowerCase();
-      filtered = filtered?.filter((p) =>
-      `${p?.firstName} ${p?.lastName}`?.toLowerCase()?.includes(query)
-      );
-    }
-
     // Filter by active tab
     if (activeFilter === 'check-in') {
       // Show all participants who haven't been checked in yet
@@ -240,8 +237,25 @@ const EventCheckInInterface = () => {
       filtered = filtered?.filter((p) => participantStages?.[p?.id] === 'out');
     }
 
+    // Prefer participant-name matches, then fall back to any text or number field.
+    if (searchQuery?.trim()) {
+      const query = searchQuery.trim().toLowerCase();
+      const nameMatches = filtered.filter((participant) =>
+        `${participant?.firstName || ''} ${participant?.lastName || ''}`.toLowerCase().includes(query)
+      );
+
+      filtered = nameMatches.length > 0
+        ? nameMatches
+        : filtered.filter((participant) => getParticipantSearchText(participant).includes(query));
+    }
+
     return filtered;
   }, [searchQuery, participants, activeFilter, participantStages]);
+
+  const selectedSearchParticipant = searchQuery.trim() && filteredParticipants.length === 1
+    ? filteredParticipants[0]
+    : null;
+  const selectedSearchParticipantId = selectedSearchParticipant?.id;
 
   useLayoutEffect(() => {
     const savedScrollY = pendingPageScrollRestoreRef.current;
@@ -439,6 +453,21 @@ const EventCheckInInterface = () => {
           console.error('Error unchecking out:', error);
         }
       }
+    }
+  };
+
+  const handleSearchKeyDown = (event) => {
+    if (event.key !== 'Enter' || !selectedSearchParticipantId) return;
+    if (pendingTransitions?.[selectedSearchParticipantId]) return;
+
+    event.preventDefault();
+
+    if (activeFilter === 'check-in') {
+      handleCheckInToggle(selectedSearchParticipantId, true);
+    } else if (activeFilter === 'in') {
+      handleInTabToggle(selectedSearchParticipantId, true);
+    } else {
+      handleRemoveParticipant(selectedSearchParticipantId);
     }
   };
 
@@ -644,9 +673,16 @@ const EventCheckInInterface = () => {
                 preservePageScrollForListUpdate();
                 setSearchQuery(e?.target?.value);
               }}
+              onKeyDown={handleSearchKeyDown}
               onFocus={(e) => e?.target?.select()}
               onClick={(e) => e?.target?.select()}
+              aria-describedby={selectedSearchParticipant ? 'search-selection-status' : undefined}
               className="w-full border-slate-200 bg-slate-50/80" />
+            <span id="search-selection-status" className="sr-only" aria-live="polite">
+              {selectedSearchParticipant
+                ? `${selectedSearchParticipant?.firstName} ${selectedSearchParticipant?.lastName} selected. Press Enter to ${activeFilter === 'check-in' ? 'check in' : activeFilter === 'in' ? 'check out' : 'move back to checked in'}.`
+                : ''}
+            </span>
           </div>
           <Button
             onClick={() => setIsAddAttendeeModalOpen(true)}
@@ -685,8 +721,9 @@ const EventCheckInInterface = () => {
                   
                   return (
                     <React.Fragment key={participant?.id}>
-                      <tr 
-                        className="border-b border-slate-200 transition-colors duration-100"
+                      <tr
+                        aria-selected={selectedSearchParticipantId === participant?.id}
+                        className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? 'ring-2 ring-inset ring-primary' : ''}`}
                         style={{ backgroundColor: bgColor || 'transparent' }}
                       >
                         <td className="px-6 py-4">
@@ -1062,8 +1099,9 @@ const EventCheckInInterface = () => {
 
                 return (
                   <React.Fragment key={participant?.id}>
-                    <tr 
-                      className="border-b border-slate-200 transition-colors duration-100"
+                    <tr
+                      aria-selected={selectedSearchParticipantId === participant?.id}
+                      className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? 'ring-2 ring-inset ring-primary' : ''}`}
                       style={{ backgroundColor: bgColor || 'transparent' }}
                     >
                       <td className="px-6 py-4">
@@ -1308,7 +1346,8 @@ const EventCheckInInterface = () => {
                   return (
                     <React.Fragment key={participant?.id}>
                       <tr
-                        className="border-b border-slate-200 transition-colors duration-100"
+                        aria-selected={selectedSearchParticipantId === participant?.id}
+                        className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? 'ring-2 ring-inset ring-primary' : ''}`}
                         style={{ backgroundColor: bgColor || 'transparent' }}
                       >
                         <td className="px-12 py-4 sm:px-24">

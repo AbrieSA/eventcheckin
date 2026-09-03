@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import Icon from '../../components/AppIcon';
 import Button from '../../components/ui/Button';
-import BackButton from '../../components/ui/BackButton';
+import GlobalHeader from '../../components/ui/GlobalHeader';
 import Input from '../../components/ui/Input';
 import { userManagementService } from '../../services/userManagementService';
 import UserFormModal from './components/UserFormModal';
@@ -186,21 +186,7 @@ const UserManagementDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-card border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            <BackButton
-              onClick={() => navigate('/home-dashboard')}
-              iconName="Home"
-              iconSize={21}
-              className="h-11 px-4"
-            >
-              Home
-            </BackButton>
-          </div>
-        </div>
-      </header>
+      <GlobalHeader />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
