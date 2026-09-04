@@ -93,11 +93,6 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
       setError('Event date is required');
       return;
     }
-    if (!eventCategory?.trim()) {
-      setError('Event category is required');
-      return;
-    }
-
     if (loggedParticipants?.length === 0) {
       setError('No participants to log. Please check in at least one participant.');
       return;
@@ -111,7 +106,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
       const eventData = {
         eventName,
         eventDate,
-        eventCategory,
+        eventCategory: eventCategory?.trim() || null,
         notes: notes?.trim() || null
       };
 
@@ -180,7 +175,7 @@ const LogEventModal = ({ isOpen, onClose, participants, participantStages, onRem
             <div>
               <Input
                 type="text"
-                placeholder="Event Category"
+                placeholder="Event Category (optional)"
                 value={eventCategory}
                 onChange={(e) => setEventCategory(e?.target?.value)}
                 className="w-full border-slate-200 bg-slate-50/80"

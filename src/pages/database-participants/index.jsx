@@ -7,6 +7,7 @@ import { attendanceService } from '../../services/attendanceService';
 import { reportError } from '../../services/errorReportingService';
 import ParticipantDetailsModal from './components/ParticipantDetailsModal';
 import ExportModal from './components/ExportModal';
+import ImportUpdateModal from './components/ImportUpdateModal';
 import AttendanceHistoryModal from './components/AttendanceHistoryModal';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
@@ -26,6 +27,7 @@ const DatabaseParticipants = () => {
   const [showOptions, setShowOptions] = useState(false);
   const [selectedParticipant, setSelectedParticipant] = useState(null);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showImportUpdateModal, setShowImportUpdateModal] = useState(false);
   const [attendanceCounts, setAttendanceCounts] = useState(() => initialDatabaseCache?.attendanceCounts || {});
   const [selectedAttendanceParticipant, setSelectedAttendanceParticipant] = useState(null);
   const [showAddParticipantModal, setShowAddParticipantModal] = useState(false);
@@ -140,6 +142,11 @@ const DatabaseParticipants = () => {
 
   const handleAddParticipant = () => {
     setShowAddParticipantModal(true);
+    setShowOptions(false);
+  };
+
+  const handleImportUpdate = () => {
+    setShowImportUpdateModal(true);
     setShowOptions(false);
   };
 
@@ -309,6 +316,12 @@ const DatabaseParticipants = () => {
                     <span className="text-base">Add Participant</span>
                   </button>
                   <button
+                  onClick={handleImportUpdate}
+                  className="flex w-full items-center space-x-3 px-4 py-3 text-left font-medium text-gray-900 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:bg-gray-100 focus-visible:text-gray-900 dark:text-gray-100 dark:hover:bg-gray-700 dark:hover:text-gray-100 dark:focus-visible:bg-gray-700 dark:focus-visible:text-gray-100">
+                    <Icon name="Upload" size={18} className="text-gray-900 dark:text-gray-100" />
+                    <span className="text-base">Import updates</span>
+                  </button>
+                  <button
                   onClick={() => {
                     handleExport();
                   }}
@@ -476,6 +489,13 @@ const DatabaseParticipants = () => {
         onClose={() => setShowExportModal(false)} />
 
       }
+
+      {showImportUpdateModal && (
+        <ImportUpdateModal
+          participants={participants}
+          onClose={() => setShowImportUpdateModal(false)}
+        />
+      )}
 
       {/* Add Participant Modal */}
       <AddAttendeeModal

@@ -695,7 +695,7 @@ const EventCheckInInterface = () => {
         {/* Table - Different layouts for each tab */}
         <div className="overflow-hidden rounded-[30px] border border-slate-200/80 bg-white/95 shadow-sm">
           {activeFilter === 'check-in' &&
-          <table className="w-full">
+          <table className="w-full border-separate border-spacing-0">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70">
                   <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900 w-40">
@@ -723,7 +723,7 @@ const EventCheckInInterface = () => {
                     <React.Fragment key={participant?.id}>
                       <tr
                         aria-selected={selectedSearchParticipantId === participant?.id}
-                        className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? 'ring-2 ring-inset ring-primary' : ''}`}
+                        className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? "relative isolate after:pointer-events-none after:absolute after:inset-[2px] after:z-10 after:rounded-[24px] after:border-2 after:border-[#10B981] after:content-['']" : ''}`}
                         style={{ backgroundColor: bgColor || 'transparent' }}
                       >
                         <td className="px-6 py-4">
@@ -1073,7 +1073,7 @@ const EventCheckInInterface = () => {
           }
 
           {activeFilter === 'in' &&
-          <table className="w-full">
+          <table className="w-full border-separate border-spacing-0">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70">
                   <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900 w-40">
@@ -1101,7 +1101,7 @@ const EventCheckInInterface = () => {
                   <React.Fragment key={participant?.id}>
                     <tr
                       aria-selected={selectedSearchParticipantId === participant?.id}
-                      className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? 'ring-2 ring-inset ring-primary' : ''}`}
+                      className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? "relative isolate after:pointer-events-none after:absolute after:inset-[2px] after:z-10 after:rounded-[24px] after:border-2 after:border-[#10B981] after:content-['']" : ''}`}
                       style={{ backgroundColor: bgColor || 'transparent' }}
                     >
                       <td className="px-6 py-4">
@@ -1327,7 +1327,7 @@ const EventCheckInInterface = () => {
           }
 
           {activeFilter === 'out' &&
-          <table className="w-full">
+          <table className="w-full border-separate border-spacing-0">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50/70">
                   <th className="px-12 py-4 text-left text-sm font-semibold text-slate-900 sm:px-24">
@@ -1347,7 +1347,7 @@ const EventCheckInInterface = () => {
                     <React.Fragment key={participant?.id}>
                       <tr
                         aria-selected={selectedSearchParticipantId === participant?.id}
-                        className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? 'ring-2 ring-inset ring-primary' : ''}`}
+                        className={`border-b border-slate-200 transition-colors duration-100 ${selectedSearchParticipantId === participant?.id ? "relative isolate after:pointer-events-none after:absolute after:inset-[2px] after:z-10 after:rounded-[24px] after:border-2 after:border-[#10B981] after:content-['']" : ''}`}
                         style={{ backgroundColor: bgColor || 'transparent' }}
                       >
                         <td className="px-12 py-4 sm:px-24">
