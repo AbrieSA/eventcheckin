@@ -9,6 +9,7 @@ import { userManagementService } from '../../services/userManagementService';
 import UserFormModal from './components/UserFormModal';
 import UserDetailsModal from './components/UserDetailsModal';
 import AuditLogExportModal from './components/AuditLogExportModal';
+import { sortBySearchRelevance } from '../../utils/searchRanking';
 
 const UserManagementDashboard = () => {
   const navigate = useNavigate();
@@ -71,12 +72,19 @@ const UserManagementDashboard = () => {
 
     // Search filter
     if (searchTerm?.trim()) {
+      const search = searchTerm.trim().toLocaleLowerCase();
       filtered = filtered?.filter((user) => {
         const fullName = user?.fullName?.toLowerCase() || '';
         const email = user?.email?.toLowerCase() || '';
-        const search = searchTerm?.toLowerCase();
         return fullName?.includes(search) || email?.includes(search);
       });
+      filtered = sortBySearchRelevance(
+        filtered,
+        search,
+        (user) => [user?.fullName, user?.email],
+        (user) => `${user?.fullName || ''} ${user?.email || ''}`,
+        (firstUser, secondUser) => (firstUser?.fullName || '').localeCompare(secondUser?.fullName || '', undefined, { sensitivity: 'base' })
+      );
     }
 
     // Role filter
