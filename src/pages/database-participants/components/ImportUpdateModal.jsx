@@ -168,7 +168,9 @@ const ImportUpdateModal = ({ onClose, onImported }) => {
 
   const canReview = mappedColumns.length > 0 && hasIdentifier && duplicateTargets.length === 0;
   const matchedCount = previewResult?.matchedRows || 0;
-  const problemCount = previewResult?.invalidRows || 0;
+  const skippedCount = previewResult?.skippedRows ?? previewResult?.invalidRows ?? 0;
+  const issueCount = previewResult?.issueRows ?? (previewResult?.rows || []).filter((row) => row?.warnings?.length || row?.errors?.length).length;
+  const fieldLabel = (key) => EVENTME_FIELDS.find((field) => field.key === key.replace(/_([a-z0-9])/g, (_, letter) => letter.toUpperCase()))?.label || key;
 
   const selectMapping = (columnIndex, value) => {
     setMappings((current) => ({ ...current, [columnIndex]: value }));
@@ -277,20 +279,26 @@ const ImportUpdateModal = ({ onClose, onImported }) => {
 
           {step === 3 && (
             <section aria-labelledby="review-title">
-              <div className="mb-5"><h3 id="review-title" className="text-xl font-bold text-slate-900">{applyResult?.ok ? 'Participant updates complete' : 'Review participant matches'}</h3><p className="mt-1 text-sm text-slate-600">{applyResult?.ok ? `${applyResult.updatedRows || 0} participant records were updated successfully.` : problemCount > 0 ? 'Resolve every highlighted row before the import can be applied.' : 'Every row was checked against the live database. Review the changes before applying them.'}</p></div>
-              <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <div className="mb-5"><h3 id="review-title" className="text-xl font-bold text-slate-900">{applyResult?.ok ? 'Participant updates complete' : 'Review participant matches'}</h3><p className="mt-1 text-sm text-slate-600">{applyResult?.ok ? `${applyResult.updatedRows || 0} participant ${(applyResult.updatedRows || 0) === 1 ? 'record was' : 'records were'} updated. ${skippedCount} rows were skipped.` : 'Valid changes can be applied even when issues are listed. Invalid fields keep their existing values; rows without a clear, current match are skipped.'}</p></div>
+              {issueCount > 0 && <div role="alert" className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Admin review needed: {issueCount} {issueCount === 1 ? 'row has' : 'rows have'} issues. {applyResult?.ok ? 'Valid updates have been saved. Review the warnings and skipped rows below for follow-up.' : 'These issues do not block valid updates. Review the warnings and skipped rows below before confirming.'}</div>}
+              <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
                 <div className="rounded-2xl bg-emerald-50 p-4"><p className="text-2xl font-bold text-emerald-800">{matchedCount}</p><p className="text-sm text-emerald-700">Matched</p></div>
                 <div className="rounded-2xl bg-blue-50 p-4"><p className="text-2xl font-bold text-blue-800">{previewResult?.changedRows || 0}</p><p className="text-sm text-blue-700">With changes</p></div>
                 <div className="rounded-2xl bg-slate-100 p-4"><p className="text-2xl font-bold text-slate-800">{previewResult?.unchangedRows || 0}</p><p className="text-sm text-slate-600">Unchanged</p></div>
-                <div className={`rounded-2xl p-4 ${problemCount ? 'bg-red-50' : 'bg-emerald-50'}`}><p className={`text-2xl font-bold ${problemCount ? 'text-red-800' : 'text-emerald-800'}`}>{problemCount}</p><p className={`text-sm ${problemCount ? 'text-red-700' : 'text-emerald-700'}`}>Problems</p></div>
+                <div className="rounded-2xl bg-amber-50 p-4"><p className="text-2xl font-bold text-amber-800">{issueCount}</p><p className="text-sm text-amber-700">Needs review</p></div>
+                <div className="rounded-2xl bg-slate-100 p-4"><p className="text-2xl font-bold text-slate-800">{skippedCount}</p><p className="text-sm text-slate-600">Skipped</p></div>
               </div>
               <div className="max-h-[40vh] overflow-auto rounded-2xl border border-slate-200">
                 <table className="w-full min-w-[680px] text-left text-sm"><thead className="sticky top-0 z-10 bg-slate-900 text-white"><tr><th className="px-4 py-3">CSV row</th><th className="px-4 py-3">EventMe participant</th><th className="px-4 py-3">Result</th><th className="px-4 py-3">Details</th></tr></thead><tbody className="divide-y divide-slate-200">{(previewResult?.rows || []).map((row) => {
-                  const details = [row?.changedFields?.length ? `Changes: ${row.changedFields.join(', ')}.` : '', ...(row?.warnings || []), ...(row?.errors || [])].filter(Boolean).join(' ') || 'No changes';
-                  return <tr key={row.rowNumber} className={row.status === 'Invalid' ? 'bg-red-50' : ''}><td className="px-4 py-3 text-slate-500">{row.rowNumber}</td><td className="px-4 py-3 font-medium text-slate-900">{row.participantName || '—'}</td><td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${row.status === 'Invalid' ? 'bg-red-100 text-red-800' : row.status === 'Changed' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{row.status}</span></td><td className={`px-4 py-3 ${row.status === 'Invalid' ? 'text-red-700' : 'text-slate-600'}`}>{details}</td></tr>;
+                  const skipped = ['Skipped', 'Invalid'].includes(row.status);
+                  const hasIssues = Boolean(row?.warnings?.length || row?.errors?.length);
+                  const changes = !skipped && row?.changedFields?.length ? `${applyResult?.ok ? 'Updated' : 'Will update'}: ${row.changedFields.map(fieldLabel).join(', ')}.` : '';
+                  const details = [skipped ? 'This row is skipped.' : changes, ...(row?.warnings || []), ...(row?.errors || [])].filter(Boolean).join(' ') || 'No changes';
+                  const status = skipped ? 'Skipped' : hasIssues ? 'Needs review' : applyResult?.ok && row?.changedFields?.length ? 'Updated' : row.status;
+                  return <tr key={row.rowNumber} className={hasIssues || skipped ? 'bg-amber-50' : ''}><td className="px-4 py-3 text-slate-500">{row.rowNumber}</td><td className="px-4 py-3 font-medium text-slate-900">{row.participantName || '—'}</td><td className="px-4 py-3"><span className={`inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${hasIssues || skipped ? 'bg-amber-100 text-amber-900' : row.status === 'Changed' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}`}>{status}</span></td><td className={`px-4 py-3 ${hasIssues || skipped ? 'text-amber-900' : 'text-slate-600'}`}>{details}</td></tr>;
                 })}</tbody></table>
               </div>
-              {confirmApply && !applyResult?.ok && <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">Click “Confirm import” to apply all {previewResult?.changedRows || 0} changes. This action will be recorded in the audit log.</div>}
+              {confirmApply && !applyResult?.ok && <div role="alert" className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-900">Click “Confirm import” to update {previewResult?.changedRows || 0} participant records with valid changes. {skippedCount} rows will be skipped. {issueCount > 0 ? 'Issues will remain listed here for admin review. ' : ''}Updates will be recorded in the audit log.</div>}
             </section>
           )}
           {fileError && <div role="alert" className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{fileError}</div>}
@@ -301,7 +309,7 @@ const ImportUpdateModal = ({ onClose, onImported }) => {
           <div className="flex justify-end gap-3">
             <Button variant="surface" disabled={isPreviewing || isApplying} onClick={applyResult?.ok ? onClose : step === 1 ? onClose : () => { setStep((current) => current - 1); setConfirmApply(false); }} className="rounded-full">{applyResult?.ok ? 'Close' : step === 1 ? 'Cancel' : 'Previous'}</Button>
             {!applyResult?.ok && step < 3 && <Button onClick={step === 1 ? () => setStep(2) : handlePreview} disabled={step === 1 ? !fileName : !canReview || isPreviewing} loading={isPreviewing} iconName="ArrowRight" iconPosition="right" className="rounded-full">{isPreviewing ? 'Checking file…' : step === 2 ? 'Review matches' : 'Next'}</Button>}
-            {!applyResult?.ok && step === 3 && <Button onClick={handleApply} disabled={!previewResult?.ok || problemCount > 0 || isApplying || (previewResult?.changedRows || 0) === 0} loading={isApplying} iconName={confirmApply ? 'AlertTriangle' : 'Upload'} className={`rounded-full ${confirmApply ? '!bg-red-600 hover:!bg-red-700' : ''}`}>{isApplying ? 'Applying updates…' : confirmApply ? 'Confirm import' : 'Apply updates'}</Button>}
+            {!applyResult?.ok && step === 3 && <Button onClick={handleApply} disabled={!previewResult?.ok || isApplying || (previewResult?.changedRows || 0) === 0} loading={isApplying} iconName={confirmApply ? 'AlertTriangle' : 'Upload'} className="rounded-full">{isApplying ? 'Applying updates…' : confirmApply ? 'Confirm import' : 'Apply valid updates'}</Button>}
           </div>
         </div>
       </div>
