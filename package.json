@@ -57,6 +57,7 @@
     "tailwindcss-fluid-type": "^2.0.7"
   },
   "scripts": {
+    "test:participant-import": "node tests/participant-import.test.mjs",
     "start": "vite",
     "build": "vite build",
     "serve": "vite preview"
@@ -80,6 +81,7 @@
     ]
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/line-clamp": "^0.1.0",

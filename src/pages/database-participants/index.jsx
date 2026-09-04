@@ -12,6 +12,7 @@ import AttendanceHistoryModal from './components/AttendanceHistoryModal';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
 import { buildCsv } from '../../utils/csv';
+import { getSearchMatchRank } from '../../utils/searchRanking';
 
 const DatabaseParticipants = () => {
   const initialDatabaseCache = attendanceService?.getParticipantDatabaseCache();
@@ -72,12 +73,13 @@ const DatabaseParticipants = () => {
 
   const filterParticipants = () => {
     let filtered = [...participants];
+    const normalizedSearchName = searchName?.trim().toLocaleLowerCase();
 
     // Filter by participant name
-    if (searchName?.trim()) {
+    if (normalizedSearchName) {
       filtered = filtered?.filter((p) => {
-        const fullName = `${p?.firstName || ''} ${p?.lastName || ''}`?.toLowerCase();
-        return fullName?.includes(searchName?.toLowerCase());
+        const fullName = `${p?.firstName || ''} ${p?.lastName || ''}`?.toLocaleLowerCase();
+        return fullName?.includes(normalizedSearchName);
       });
     }
 
@@ -91,9 +93,15 @@ const DatabaseParticipants = () => {
       // For now, just a placeholder filter
     }
 
-    if (sortConfig) {
+    if (normalizedSearchName || sortConfig) {
       const direction = sortConfig?.direction === 'asc' ? 1 : -1;
       filtered.sort((firstParticipant, secondParticipant) => {
+        if (normalizedSearchName) {
+          const rankComparison = getSearchMatchRank(normalizedSearchName, [firstParticipant?.firstName, firstParticipant?.lastName])
+            - getSearchMatchRank(normalizedSearchName, [secondParticipant?.firstName, secondParticipant?.lastName]);
+          if (rankComparison !== 0) return rankComparison;
+        }
+
         const firstName = `${firstParticipant?.firstName || ''} ${firstParticipant?.lastName || ''}`?.trim();
         const secondName = `${secondParticipant?.firstName || ''} ${secondParticipant?.lastName || ''}`?.trim();
         const firstValue = sortConfig?.key === 'events'
@@ -106,7 +114,7 @@ const DatabaseParticipants = () => {
           ? firstValue - secondValue
           : firstValue.localeCompare(secondValue, undefined, { sensitivity: 'base' });
 
-        if (comparison !== 0) return comparison * direction;
+        if (comparison !== 0) return comparison * (sortConfig ? direction : 1);
 
         const nameComparison = firstName.localeCompare(secondName, undefined, { sensitivity: 'base' });
         if (nameComparison !== 0) return nameComparison;
@@ -154,6 +162,11 @@ const DatabaseParticipants = () => {
     // Reload participants to include the new one
     await loadParticipants({ background: true });
     setShowAddParticipantModal(false);
+  };
+
+  const handleParticipantImport = async () => {
+    const refreshed = await loadParticipants({ background: true });
+    if (!refreshed) throw new Error('Participant list refresh failed.');
   };
 
   const handleParticipantClick = (participant) => {
@@ -492,8 +505,8 @@ const DatabaseParticipants = () => {
 
       {showImportUpdateModal && (
         <ImportUpdateModal
-          participants={participants}
           onClose={() => setShowImportUpdateModal(false)}
+          onImported={handleParticipantImport}
         />
       )}
 

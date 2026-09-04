@@ -13,6 +13,8 @@ const HomeDashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isCancelConfirmation, setIsCancelConfirmation] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -25,6 +27,11 @@ const HomeDashboard = () => {
   useEffect(() => {
     loadActiveEvent();
   }, []);
+
+  useEffect(() => {
+    setIsCancelConfirmation(false);
+    setIsCancelling(false);
+  }, [activeEvent?.id]);
 
   const loadActiveEvent = async () => {
     try {
@@ -69,20 +76,22 @@ const HomeDashboard = () => {
   const handleCancelEvent = async () => {
     if (!isAdmin()) return;
     if (!activeEvent) return;
+    if (isCancelling) return;
 
-    const confirmed = window.confirm(
-      `Are you sure you want to cancel "${activeEvent?.eventName}"? This will delete the event without archiving it.`
-    );
+    if (!isCancelConfirmation) {
+      setIsCancelConfirmation(true);
+      return;
+    }
 
-    if (confirmed) {
-      try {
-        await attendanceService?.cancelActiveEvent(activeEvent?.id);
-        setActiveEvent(null);
-        alert('Event cancelled successfully.');
-      } catch (error) {
-        console.error('Error cancelling event:', error);
-        alert('Failed to cancel event. Please try again.');
-      }
+    try {
+      setIsCancelling(true);
+      await attendanceService?.cancelActiveEvent(activeEvent?.id);
+      setActiveEvent(null);
+    } catch (error) {
+      console.error('Error cancelling event:', error);
+      setIsCancelConfirmation(false);
+      setIsCancelling(false);
+      alert('Failed to cancel event. Please try again.');
     }
   };
 
@@ -143,18 +152,24 @@ const HomeDashboard = () => {
               {showAdminButtons && (
                 <button
                   onClick={handleCancelEvent}
-                  className="flex min-h-[96px] w-full items-center justify-center bg-red-50 hover:bg-red-100 border-2 border-red-300 hover:border-red-500 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl px-6 py-3 group focus:outline-none focus:ring-4 focus:ring-red-300 active:scale-[0.98]"
+                  disabled={isCancelling}
+                  aria-label={isCancelConfirmation ? `Confirm cancellation of ${activeEvent?.eventName}` : `Cancel ${activeEvent?.eventName}`}
+                  className={`flex min-h-[96px] w-full items-center justify-center border-2 shadow-lg transition-all duration-200 rounded-2xl px-6 py-3 group focus:outline-none focus:ring-4 focus:ring-red-300 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70 ${
+                    isCancelConfirmation
+                      ? 'bg-red-600 hover:bg-red-700 border-red-700 hover:border-red-800 hover:shadow-xl'
+                      : 'bg-red-50 hover:bg-red-100 border-red-300 hover:border-red-500 hover:shadow-xl'
+                  }`}
                 >
                   <div className="flex items-center justify-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 bg-red-100 group-hover:bg-red-200 rounded-full transition-colors">
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${isCancelConfirmation ? 'bg-white/20 group-hover:bg-white/25' : 'bg-red-100 group-hover:bg-red-200'}`}>
                       <Icon
-                        name="X"
+                        name={isCancelConfirmation ? 'AlertTriangle' : 'X'}
                         size={20}
-                        color="#ef4444"
+                        color={isCancelConfirmation ? '#ffffff' : '#ef4444'}
                       />
                     </div>
-                    <span className="text-base font-semibold text-red-600 group-hover:text-red-700 transition-colors">
-                      Cancel Event
+                    <span className={`text-base font-semibold transition-colors ${isCancelConfirmation ? 'text-white' : 'text-red-600 group-hover:text-red-700'}`}>
+                      {isCancelling ? 'Cancelling Event…' : isCancelConfirmation ? 'Confirm Cancellation' : 'Cancel Event'}
                     </span>
                   </div>
                 </button>

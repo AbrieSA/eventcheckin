@@ -4,6 +4,7 @@ import { ChevronDown, Check, Search, X } from "lucide-react";
 import { cn } from "../../utils/cn";
 import Button from "./Button";
 import Input from "./Input";
+import { sortBySearchRelevance } from "../../utils/searchRanking";
 
 const Select = React.forwardRef(({
     className,
@@ -34,10 +35,10 @@ const Select = React.forwardRef(({
 
     // Filter options based on search
     const filteredOptions = searchable && searchTerm
-        ? options?.filter(option =>
+        ? sortBySearchRelevance(options?.filter(option =>
             option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
             (option?.value && option?.value?.toString()?.toLowerCase()?.includes(searchTerm?.toLowerCase()))
-        )
+        ), searchTerm, (option) => [option?.label, option?.value], (option) => `${option?.label || ''} ${option?.value || ''}`)
         : options;
 
     // Get selected option(s) for display

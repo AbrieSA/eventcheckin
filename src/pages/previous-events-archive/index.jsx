@@ -3,6 +3,7 @@ import Input from '../../components/ui/Input';
 import GlobalHeader from '../../components/ui/GlobalHeader';
 import EventDetailsModal from './components/EventDetailsModal';
 import { attendanceService } from '../../services/attendanceService';
+import { sortBySearchRelevance } from '../../utils/searchRanking';
 import {
   Area,
   AreaChart,
@@ -91,9 +92,17 @@ const PreviousEventsArchive = () => {
     let filtered = [...events];
 
     // Event name search
-    if (eventNameSearch) {
+    if (eventNameSearch?.trim()) {
+      const search = eventNameSearch.trim().toLocaleLowerCase();
       filtered = filtered?.filter((event) =>
-        event?.eventName?.toLowerCase()?.includes(eventNameSearch?.toLowerCase())
+        event?.eventName?.toLocaleLowerCase()?.includes(search)
+      );
+      filtered = sortBySearchRelevance(
+        filtered,
+        search,
+        (event) => [event?.eventName],
+        (event) => event?.eventName,
+        (firstEvent, secondEvent) => (firstEvent?.eventName || '').localeCompare(secondEvent?.eventName || '', undefined, { sensitivity: 'base' })
       );
     }
 

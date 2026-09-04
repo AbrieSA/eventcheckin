@@ -10,6 +10,7 @@ import LogEventModal from '../../components/ui/LogEventModal';
 import { attendanceService } from '../../services/attendanceService';
 import AddAttendeeModal from '../../components/ui/AddAttendeeModal';
 import { supabase } from '../../lib/supabase';
+import { sortBySearchRelevance } from '../../utils/searchRanking';
 
 const TRANSITION_DELAY_MS = 1000;
 const WEEK_IN_MS = 7 * 24 * 60 * 60 * 1000;
@@ -237,16 +238,17 @@ const EventCheckInInterface = () => {
       filtered = filtered?.filter((p) => participantStages?.[p?.id] === 'out');
     }
 
-    // Prefer participant-name matches, then fall back to any text or number field.
+    // Keep every match, with names beginning with the query at the top.
     if (searchQuery?.trim()) {
       const query = searchQuery.trim().toLowerCase();
-      const nameMatches = filtered.filter((participant) =>
-        `${participant?.firstName || ''} ${participant?.lastName || ''}`.toLowerCase().includes(query)
+      filtered = sortBySearchRelevance(
+        filtered.filter((participant) => getParticipantSearchText(participant).includes(query)),
+        query,
+        (participant) => [participant?.firstName, participant?.lastName],
+        getParticipantSearchText,
+        (firstParticipant, secondParticipant) => `${firstParticipant?.firstName || ''} ${firstParticipant?.lastName || ''}`
+          .localeCompare(`${secondParticipant?.firstName || ''} ${secondParticipant?.lastName || ''}`, undefined, { sensitivity: 'base' })
       );
-
-      filtered = nameMatches.length > 0
-        ? nameMatches
-        : filtered.filter((participant) => getParticipantSearchText(participant).includes(query));
     }
 
     return filtered;

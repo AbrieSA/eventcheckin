@@ -33,7 +33,7 @@ const toSnakeCase = (obj) => {
       return acc;
     }
     
-    const snakeKey = key?.replace(/[A-Z]/g, (letter) => `_${letter?.toLowerCase()}`);
+    const snakeKey = key === 'is18OrOver' ? 'is_18_or_over' : key?.replace(/[A-Z]/g, (letter) => `_${letter?.toLowerCase()}`);
     acc[snakeKey] = toSnakeCase(obj?.[key]);
     return acc;
   }, {});
@@ -779,6 +779,42 @@ export const attendanceService = {
     }
     invalidateParticipantDatabaseCache();
     return toCamelCase(data);
+  },
+
+  async previewParticipantImport(rows) {
+    const { data, error } = await supabase
+      ?.rpc('process_participant_import', {
+        p_rows: toSnakeCase(rows),
+        p_dry_run: true
+      });
+
+    if (error) {
+      console.error('Error previewing participant import:', error?.code || 'request_failed');
+      throw new Error(error?.code === '42501'
+        ? 'You do not have permission to import participant updates.'
+        : 'The participant import could not be validated. Please try again.');
+    }
+
+    return toCamelCase(data);
+  },
+
+  async applyParticipantImport(rows) {
+    const { data, error } = await supabase
+      ?.rpc('process_participant_import', {
+        p_rows: toSnakeCase(rows),
+        p_dry_run: false
+      });
+
+    if (error) {
+      console.error('Error applying participant import:', error?.code || 'request_failed');
+      throw new Error(error?.code === '42501'
+        ? 'You do not have permission to import participant updates.'
+        : 'The import result could not be confirmed. Reload the participant list and preview again before retrying.');
+    }
+
+    const result = toCamelCase(data);
+    if (result?.ok) invalidateParticipantDatabaseCache();
+    return result;
   },
 
   // Update participant consent fields
