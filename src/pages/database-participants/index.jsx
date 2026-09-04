@@ -164,6 +164,11 @@ const DatabaseParticipants = () => {
     setShowAddParticipantModal(false);
   };
 
+  const handleParticipantImport = async () => {
+    const refreshed = await loadParticipants({ background: true });
+    if (!refreshed) throw new Error('Participant list refresh failed.');
+  };
+
   const handleParticipantClick = (participant) => {
     setSelectedParticipant(participant);
   };
@@ -500,8 +505,8 @@ const DatabaseParticipants = () => {
 
       {showImportUpdateModal && (
         <ImportUpdateModal
-          participants={participants}
           onClose={() => setShowImportUpdateModal(false)}
+          onImported={handleParticipantImport}
         />
       )}
 
